@@ -21,23 +21,23 @@
 
         .background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('pozadi.png');
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url('pozadi.png');
             background-size: cover; background-position: center;
             z-index: -1; transition: transform 1.5s ease, filter 1.5s ease;
         }
 
-        /* DISCORD ZÁMEK */
+        /* DISCORD LOGIN OVERLAY */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(25px);
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
             transition: all 0.8s ease;
         }
 
         .login-box {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-neon);
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--primary-neon);
             padding: 50px; border-radius: 30px; text-align: center; max-width: 400px;
-            box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
         }
 
         .discord-btn {
@@ -45,36 +45,37 @@
             background-color: var(--discord-color); color: white;
             text-decoration: none; padding: 18px 30px; border-radius: 15px;
             font-weight: 700; transition: 0.3s; margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
         }
 
         .discord-btn:hover { transform: scale(1.05); background-color: #4752c4; }
 
-        /* HLAVNÍ OBSAH */
+        /* GATEWAY (ODEMČENÝ WEB) */
         #gateway {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; height: 100vh; perspective: 1200px;
             visibility: hidden; opacity: 0; transition: opacity 1s ease;
         }
 
-        .card-container { display: flex; gap: 80px; transform-style: preserve-3d; }
+        .card-container { display: flex; gap: 60px; transform-style: preserve-3d; }
 
         .card {
-            background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-            padding: 50px 40px; width: 280px; text-align: center;
-            cursor: pointer; transition: all 0.6s ease;
+            background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px;
+            padding: 50px 40px; width: 260px; text-align: center;
+            cursor: pointer; transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .card.applicant { transform: rotateY(25deg); border-bottom: 4px solid var(--secondary-neon); }
-        .card.admin { transform: rotateY(-25deg); border-bottom: 4px solid var(--primary-neon); }
+        .card.applicant { transform: rotateY(20deg); border-bottom: 4px solid var(--secondary-neon); }
+        .card.admin { transform: rotateY(-20deg); border-bottom: 4px solid var(--primary-neon); }
 
-        .card:hover { transform: rotateY(0deg) translateZ(50px) translateY(-10px); background: rgba(255,255,255,0.15); }
+        .card:hover { transform: rotateY(0deg) translateZ(50px) translateY(-10px); background: rgba(255,255,255,0.12); }
 
-        /* STAV PO PŘIHLÁŠENÍ */
+        /* LOGGED IN STATE */
         .logged-in #login-overlay { opacity: 0; visibility: hidden; pointer-events: none; }
         .logged-in #gateway { visibility: visible; opacity: 1; }
 
-        .main-title { font-size: 3rem; letter-spacing: 5px; margin-bottom: 50px; text-transform: uppercase; }
+        .main-title { font-size: 3.5rem; letter-spacing: 6px; margin-bottom: 60px; text-transform: uppercase; text-shadow: 0 0 20px rgba(0,242,255,0.5); }
     </style>
 </head>
 <body>
@@ -84,8 +85,8 @@
     <div id="login-overlay">
         <div class="login-box">
             <img src="cmrp.png" alt="Logo" style="width: 120px; margin-bottom: 20px;">
-            <h2 style="color: var(--primary-neon);">PŘIHLÁŠENÍ</h2>
-            <p>Pro vstup do systému CMRP se nejprve autorizuj přes Discord.</p>
+            <h2 style="color: var(--primary-neon); letter-spacing: 2px;">IDENTIFIKACE</h2>
+            <p>Vstup povolen pouze pro ověřené členy komunity.</p>
             <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" class="discord-btn">
                 PŘIHLÁSIT PŘES DISCORD
             </a>
@@ -96,33 +97,99 @@
         <h1 class="main-title">Community Roleplay</h1>
         <div class="card-container">
             <div class="card applicant">
-                <span style="font-size: 50px;">📄</span>
+                <span style="font-size: 60px;">📄</span>
                 <h2>PŘIHLÁŠKA</h2>
-                <p>Nábor nových členů</p>
+                <p>Staň se součástí příběhu</p>
             </div>
             <div class="card admin">
-                <span style="font-size: 50px;">👔</span>
-                <h2>ADMIN PANEL</h2>
-                <p>Správa whitelistu</p>
+                <span style="font-size: 60px;">👔</span>
+                <h2>WL ADDER</h2>
+                <p>Administrace systému</p>
             </div>
         </div>
+        <button onclick="logout()" style="margin-top: 50px; background:none; border: 1px solid rgba(255,255,255,0.2); color:white; padding: 10px 20px; border-radius: 10px; cursor:pointer;">Odhlásit se</button>
     </div>
 
-    <script>
-        // Detekce kódu z Discordu po návratu
-        window.onload = function() {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Konfigurace Firebase (Tvá data)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs",
+            authDomain: "cmrp-system.firebaseapp.com",
+            projectId: "cmrp-system",
+            storageBucket: "cmrp-system.firebasestorage.app",
+            messagingSenderId: "264321137651",
+            appId: "1:264321137651:web:295e93bd12e7f8b80fb086"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Discord API údaje
+        const CLIENT_ID = '1475163869092511834';
+        const CLIENT_SECRET = 'gq2AOTAhnjocJs5CZJDFZCVRNnzkj7gj';
+        const REDIRECT_URI = 'https://cmrp-system.vercel.app/';
+
+        window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
+            const savedUser = localStorage.getItem('discord_user');
 
-            if (code) {
-                // Uživatel se vrátil z Discordu s kódem
+            if (savedUser) {
                 document.body.classList.add('logged-in');
-                
-                // Odstraníme kód z adresy pro čistý vzhled
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
-                console.log("Přihlášení úspěšné. Kód uložen pro backend.");
+            } 
+            else if (code) {
+                try {
+                    // 1. Výměna kódu za token (Pozn: V produkci doporučeno přes backend/Vercel functions)
+                    const response = await fetch('https://discord.com/api/oauth2/token', {
+                        method: 'POST',
+                        body: new URLSearchParams({
+                            client_id: CLIENT_ID,
+                            client_secret: CLIENT_SECRET,
+                            code: code,
+                            grant_type: 'authorization_code',
+                            redirect_uri: REDIRECT_URI,
+                            scope: 'identify email',
+                        }),
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.access_token) {
+                        // 2. Získání údajů o uživateli
+                        const userRes = await fetch('https://discord.com/api/users/@me', {
+                            headers: { authorization: `Bearer ${data.access_token}` }
+                        });
+                        const userData = await userRes.json();
+
+                        // 3. Uložení do Firebase
+                        const userProfile = {
+                            id: userData.id,
+                            username: userData.username,
+                            avatar: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`,
+                            email: userData.email,
+                            lastLogin: new Date().toISOString()
+                        };
+
+                        await setDoc(doc(db, "users", userData.id), userProfile);
+                        
+                        // 4. Uložení do prohlížeče a odemknutí
+                        localStorage.setItem('discord_user', JSON.stringify(userProfile));
+                        document.body.classList.add('logged-in');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                } catch (err) {
+                    console.error("Chyba při přihlášení:", err);
+                }
             }
+        };
+
+        window.logout = function() {
+            localStorage.removeItem('discord_user');
+            location.reload();
         }
     </script>
 </body>
