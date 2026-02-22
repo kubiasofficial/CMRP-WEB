@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Roleplay | Přihlášky</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-neon: #00f2ff;
+            --secondary-neon: #00ff88;
+            --discord-color: #5865F2;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden; color: white;
+            background-color: #050505;
+        }
+
+        .background {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('pozadi.png');
+            background-size: cover; background-position: center;
+            z-index: -1; transition: transform 1.5s ease, filter 1.5s ease;
+        }
+
+        /* DISCORD ZÁMEK */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(25px);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+            transition: all 0.8s ease;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-neon);
+            padding: 50px; border-radius: 30px; text-align: center; max-width: 400px;
+        }
+
+        .discord-btn {
+            display: inline-flex; align-items: center; gap: 12px;
+            background-color: var(--discord-color); color: white;
+            text-decoration: none; padding: 18px 30px; border-radius: 15px;
+            font-weight: 700; transition: 0.3s; margin-top: 20px;
+        }
+
+        .discord-btn:hover { transform: scale(1.05); background-color: #4752c4; }
+
+        /* HLAVNÍ OBSAH */
+        #gateway {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 100vh; perspective: 1200px;
+            visibility: hidden; opacity: 0; transition: opacity 1s ease;
+        }
+
+        .card-container { display: flex; gap: 80px; transform-style: preserve-3d; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            padding: 50px 40px; width: 280px; text-align: center;
+            cursor: pointer; transition: all 0.6s ease;
+        }
+
+        .card.applicant { transform: rotateY(25deg); border-bottom: 4px solid var(--secondary-neon); }
+        .card.admin { transform: rotateY(-25deg); border-bottom: 4px solid var(--primary-neon); }
+
+        /* STAV PO PŘIHLÁŠENÍ */
+        .logged-in #login-overlay { opacity: 0; visibility: hidden; }
+        .logged-in #gateway { visibility: visible; opacity: 1; }
+
+        .main-title { font-size: 3rem; letter-spacing: 5px; margin-bottom: 50px; }
+    </style>
+</head>
+<body>
+
+    <div class="background"></div>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <img src="cmrp.png" alt="Logo" style="width: 100px; margin-bottom: 20px;">
+            <h2>OVĚŘENÍ</h2>
+            <p>Pro pokračování se přihlas přes Discord.</p>
+            <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-dashboard.vercel.app%2F&scope=identify+email" class="discord-btn">
+                PŘIHLÁSIT PŘES DISCORD
+            </a>
+        </div>
+    </div>
+
+    <div id="gateway">
+        <h1 class="main-title">COMMUNITY ROLEPLAY</h1>
+        <div class="card-container">
+            <div class="card applicant">
+                <h2>PODAT PŘIHLÁŠKU</h2>
+            </div>
+            <div class="card admin">
+                <h2>WL ADDER</h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // TENTO SKRIPT HLÍDÁ NÁVRAT Z DISCORDU
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (code) {
+                // Pokud v adrese vidíme "code", uživatel se úspěšně vrátil
+                document.body.classList.add('logged-in');
+                
+                // Vyčistíme adresu (odstraníme ten kód, aby to vypadalo hezky)
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                console.log("Discord ověření proběhlo úspěšně!");
+            }
+        }
+    </script>
+</body>
+</html>
