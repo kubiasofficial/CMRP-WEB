@@ -37,6 +37,7 @@
         .login-box {
             background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-neon);
             padding: 50px; border-radius: 30px; text-align: center; max-width: 400px;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
         }
 
         .discord-btn {
@@ -67,11 +68,13 @@
         .card.applicant { transform: rotateY(25deg); border-bottom: 4px solid var(--secondary-neon); }
         .card.admin { transform: rotateY(-25deg); border-bottom: 4px solid var(--primary-neon); }
 
+        .card:hover { transform: rotateY(0deg) translateZ(50px) translateY(-10px); background: rgba(255,255,255,0.15); }
+
         /* STAV PO PŘIHLÁŠENÍ */
-        .logged-in #login-overlay { opacity: 0; visibility: hidden; }
+        .logged-in #login-overlay { opacity: 0; visibility: hidden; pointer-events: none; }
         .logged-in #gateway { visibility: visible; opacity: 1; }
 
-        .main-title { font-size: 3rem; letter-spacing: 5px; margin-bottom: 50px; }
+        .main-title { font-size: 3rem; letter-spacing: 5px; margin-bottom: 50px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -80,41 +83,45 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <img src="cmrp.png" alt="Logo" style="width: 100px; margin-bottom: 20px;">
-            <h2>OVĚŘENÍ</h2>
-            <p>Pro pokračování se přihlas přes Discord.</p>
-            <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-dashboard.vercel.app%2F&scope=identify+email" class="discord-btn">
+            <img src="cmrp.png" alt="Logo" style="width: 120px; margin-bottom: 20px;">
+            <h2 style="color: var(--primary-neon);">PŘIHLÁŠENÍ</h2>
+            <p>Pro vstup do systému CMRP se nejprve autorizuj přes Discord.</p>
+            <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" class="discord-btn">
                 PŘIHLÁSIT PŘES DISCORD
             </a>
         </div>
     </div>
 
     <div id="gateway">
-        <h1 class="main-title">COMMUNITY ROLEPLAY</h1>
+        <h1 class="main-title">Community Roleplay</h1>
         <div class="card-container">
             <div class="card applicant">
-                <h2>PODAT PŘIHLÁŠKU</h2>
+                <span style="font-size: 50px;">📄</span>
+                <h2>PŘIHLÁŠKA</h2>
+                <p>Nábor nových členů</p>
             </div>
             <div class="card admin">
-                <h2>WL ADDER</h2>
+                <span style="font-size: 50px;">👔</span>
+                <h2>ADMIN PANEL</h2>
+                <p>Správa whitelistu</p>
             </div>
         </div>
     </div>
 
     <script>
-        // TENTO SKRIPT HLÍDÁ NÁVRAT Z DISCORDU
+        // Detekce kódu z Discordu po návratu
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
 
             if (code) {
-                // Pokud v adrese vidíme "code", uživatel se úspěšně vrátil
+                // Uživatel se vrátil z Discordu s kódem
                 document.body.classList.add('logged-in');
                 
-                // Vyčistíme adresu (odstraníme ten kód, aby to vypadalo hezky)
+                // Odstraníme kód z adresy pro čistý vzhled
                 window.history.replaceState({}, document.title, window.location.pathname);
                 
-                console.log("Discord ověření proběhlo úspěšně!");
+                console.log("Přihlášení úspěšné. Kód uložen pro backend.");
             }
         }
     </script>
