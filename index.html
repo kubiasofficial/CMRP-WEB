@@ -26,7 +26,6 @@
             background-size: cover; background-position: center; z-index: -1;
         }
 
-        /* LOGIN SCREEN */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(25px);
@@ -45,7 +44,6 @@
             font-weight: 700; transition: 0.3s; margin-top: 25px;
         }
 
-        /* GATEWAY */
         #gateway {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; perspective: 1500px;
@@ -73,7 +71,7 @@
 
         .card.applicant { border-bottom: 5px solid var(--secondary-neon); }
         .card.status { border-bottom: 5px solid var(--warning-yellow); cursor: default; }
-        .card.admin { border-bottom: 5px solid var(--primary-neon); }
+        .card.admin { border-bottom: 5px solid var(--primary-neon); display: none; }
         
         .card:hover:not(.status) { transform: translateZ(50px); background: rgba(255,255,255,0.1); }
 
@@ -124,7 +122,7 @@
                 <p id="wl-info" style="color: #888; font-size: 0.7rem; margin-top: 5px;"></p>
             </div>
 
-            <div id="btn-admin" class="card admin" style="display: none;">
+            <div id="btn-admin" class="card admin">
                 <div style="font-size: 50px; margin-bottom: 10px;">👔</div>
                 <h3>WL ADDER</h3>
                 <p style="color: #888; font-size: 0.8rem;">Správa systému</p>
@@ -136,7 +134,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs",
@@ -157,8 +155,9 @@
 
             if (savedUser) {
                 const user = JSON.parse(savedUser);
-                setupRealtimeUpdates(user.discordId);
                 renderUserUI(user);
+                await checkAndCreateUser(user);
+                setupRealtimeUpdates(user.discordId);
             } 
             else if (code) {
                 document.body.classList.add('logged-in');
@@ -172,36 +171,45 @@
                             avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
                         };
                         localStorage.setItem('discord_user', JSON.stringify(user));
-                        setupRealtimeUpdates(user.discordId);
                         renderUserUI(user);
+                        await checkAndCreateUser(user);
+                        setupRealtimeUpdates(user.discordId);
                     }
-                } catch (err) { console.error(err); }
+                } catch (err) { console.error("Chyba přihlášení:", err); }
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         };
 
+        async function checkAndCreateUser(user) {
+            const userRef = doc(db, "users", user.discordId);
+            const snap = await getDoc(userRef);
+            
+            // Pokud uživatel neexistuje, nebo mu chybí pole wlStatus, vytvoříme/aktualizujeme ho
+            if (!snap.exists() || !snap.data().wlStatus) {
+                await setDoc(userRef, {
+                    discordId: user.discordId,
+                    username: user.username,
+                    avatar: user.avatar,
+                    wlStatus: snap.exists() ? (snap.data().wlStatus || "none") : "none",
+                    attemptsLeft: snap.exists() ? (snap.data().attemptsLeft || 3) : 3,
+                    role: snap.exists() ? (snap.data().role || "user") : "user",
+                    lastLogin: new Date().toISOString()
+                }, { merge: true });
+            }
+        }
+
         function setupRealtimeUpdates(userId) {
-            // Sledujeme změny v databázi v reálném čase
             onSnapshot(doc(db, "users", userId), (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     updateStatusCard(data);
                     
-                    // Zobrazit admin kartu jen pokud je admin
+                    const adminCard = document.getElementById('btn-admin');
                     if (data.role === "admin") {
-                        document.getElementById('btn-admin').style.display = "block";
+                        adminCard.style.display = "block";
+                    } else {
+                        adminCard.style.display = "none";
                     }
-                } else {
-                    // Pokud uživatel v DB ještě není, vytvoříme ho
-                    const user = JSON.parse(localStorage.getItem('discord_user'));
-                    setDoc(doc(db, "users", userId), {
-                        discordId: userId,
-                        username: user.username,
-                        avatar: user.avatar,
-                        wlStatus: "none",
-                        attemptsLeft: 3,
-                        role: "user"
-                    });
                 }
             });
         }
@@ -210,22 +218,26 @@
             const label = document.getElementById('wl-status-label');
             const info = document.getElementById('wl-info');
             
-            if (data.wlStatus === "none") {
+            // Ošetření případu, kdyby data ještě nebyla v DB úplná
+            const status = data.wlStatus || "none";
+            const attempts = data.attemptsLeft !== undefined ? data.attemptsLeft : 3;
+
+            if (status === "none") {
                 label.innerText = "NEZAŽÁDÁNO";
                 label.className = "status-text";
-                info.innerText = `Zbývající pokusy: ${data.attemptsLeft}/3`;
-            } else if (data.wlStatus === "pending") {
+                info.innerText = `Zbývající pokusy: ${attempts}/3`;
+            } else if (status === "pending") {
                 label.innerText = "ČEKÁ NA SCHVÁLENÍ";
                 label.className = "status-text status-pending";
                 info.innerText = "Adder brzy posoudí tvou žádost.";
-            } else if (data.wlStatus === "approved") {
-                label.innerText = "SCHVÁLENO (ANO)";
+            } else if (status === "approved") {
+                label.innerText = "SCHVÁLENO";
                 label.className = "status-text status-approved";
                 info.innerText = `Schválil: ${data.assignedAdder || 'Admin'}`;
-            } else if (data.wlStatus === "rejected") {
-                label.innerText = "ZAMÍTNUTO (NE)";
+            } else if (status === "rejected") {
+                label.innerText = "ZAMÍTNUTO";
                 label.className = "status-text status-rejected";
-                info.innerText = `Pokusy: ${data.attemptsLeft}/3. Důvod: ${data.rejectReason || 'Neuveden'}`;
+                info.innerText = `Důvod: ${data.rejectReason || 'Neuveden'}`;
             }
         }
 
