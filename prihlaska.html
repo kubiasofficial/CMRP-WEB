@@ -14,56 +14,68 @@
         body, html {
             margin: 0; padding: 0; min-height: 100vh;
             font-family: 'Rajdhani', sans-serif;
-            background: #000; color: white;
+            background-color: #000; color: white;
             display: flex; justify-content: center; align-items: center;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .background {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            /* Průhlednost nastavena pro decentní viditelnost */
-            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('prihlaskapozadi.jpg');
-            background-size: cover; background-position: center; z-index: -1;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.75)), url('prihlaskapozadi.jpg');
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            z-index: -1;
         }
 
         .container {
             width: 90%; max-width: 500px; padding: 40px;
-            background: rgba(10, 10, 10, 0.6); 
-            backdrop-filter: blur(15px);
-            border: 2px solid var(--primary-neon);
-            border-radius: 30px; 
-            box-shadow: 0 0 40px rgba(188, 19, 254, 0.25);
-            /* Animace příletu */
+            background: rgba(10, 10, 10, 0.7); backdrop-filter: blur(20px);
+            border: 2px solid var(--primary-neon); border-radius: 30px; 
+            box-shadow: 0 0 50px rgba(188, 19, 254, 0.3);
+            position: relative;
             transform: translateY(100vh);
             animation: slideIn 0.8s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes slideIn { to { transform: translateY(0); } }
 
-        h1 { color: var(--primary-neon); text-transform: uppercase; text-align: center; }
-        label { display: block; color: var(--secondary-neon); margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; }
+        .btn-back {
+            position: absolute; top: 20px; right: 20px;
+            color: var(--secondary-neon); text-decoration: none;
+            font-weight: 700; font-size: 0.8rem; letter-spacing: 1px;
+            border: 1px solid var(--secondary-neon); padding: 5px 15px;
+            border-radius: 10px; transition: 0.3s;
+        }
+        .btn-back:hover { background: var(--secondary-neon); color: black; box-shadow: 0 0 15px var(--secondary-neon); }
+
+        h1 { color: var(--primary-neon); text-transform: uppercase; text-align: center; margin-bottom: 30px; letter-spacing: 2px; }
+        label { display: block; color: var(--secondary-neon); margin-bottom: 5px; font-weight: 700; font-size: 0.85rem; }
         
         input {
-            width: 100%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px; border-radius: 10px; color: white; margin-bottom: 20px; box-sizing: border-box;
+            width: 100%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255,255,255,0.15);
+            padding: 14px; border-radius: 12px; color: white; margin-bottom: 25px; box-sizing: border-box;
+            font-family: 'Rajdhani'; outline: none;
         }
+        input:focus { border-color: var(--primary-neon); background: rgba(188, 19, 254, 0.05); }
 
         .btn-submit {
             background: var(--primary-neon); color: white; border: none; width: 100%;
-            padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s;
+            padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; 
+            transition: 0.3s; font-family: 'Rajdhani'; font-size: 1.1rem; letter-spacing: 2px;
         }
+        .btn-submit:hover { box-shadow: 0 0 25px var(--primary-neon); transform: scale(1.02); }
     </style>
- head>
+</head>
 <body>
     <div class="background"></div>
     <div class="container">
-        <h1>NÁBOROVÝ FORMULÁŘ</h1>
+        <a href="index.html" class="btn-back">← ZPĚT</a>
+        <h1>NÁBOROVÝ PANEL</h1>
         <form>
             <label>STEAM HEX ID</label>
-            <input type="text" placeholder="1100001...">
+            <input type="text" placeholder="např. 1100001...">
             <label>JMÉNO POSTAVY (IC)</label>
             <input type="text" placeholder="John Doe">
-            <button type="submit" class="btn-submit">ODESLAT</button>
+            <button type="submit" class="btn-submit">ODESLAT PŘIHLÁŠKU</button>
         </form>
     </div>
 </body>

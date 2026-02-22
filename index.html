@@ -15,45 +15,37 @@
         body, html {
             margin: 0; padding: 0; min-height: 100vh;
             font-family: 'Rajdhani', sans-serif;
-            color: white;
-            background: transparent; /* Změněno z černé na transparentní */
+            color: white; background: transparent;
             overflow: hidden;
         }
 
         .background {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            /* Cesta upravena na čistý název souboru */
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url('pozadicko.jpg');
-            background-size: cover;
-            background-position: center;
-            z-index: -10;
-            transition: transform 0.8s ease-in-out;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('pozadicko.jpg');
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            z-index: -10; transition: transform 0.8s ease;
         }
 
-        /* ANIMACE ROZSTŘELENÍ */
+        /* ANIMACE */
         .slide-left { transform: translateX(-150vw) rotate(-15deg) !important; opacity: 0 !important; }
         .slide-right { transform: translateX(150vw) rotate(15deg) !important; opacity: 0 !important; }
         .slide-up { transform: translateY(-120vh) !important; opacity: 0 !important; }
-        .zoom-bg { transform: scale(1.1); }
 
         #gateway {
             display: flex; flex-direction: column; align-items: center;
-            justify-content: center; min-height: 100vh;
-            transition: 0.8s ease;
+            justify-content: center; min-height: 100vh; transition: 0.8s ease;
         }
 
-        #user-profile { transition: 0.8s ease; }
         #user-avatar {
             width: 120px; height: 120px; border-radius: 50%;
             border: 3px solid var(--primary-neon); box-shadow: 0 0 30px rgba(188, 19, 254, 0.6);
-            margin-bottom: 15px;
+            margin-bottom: 15px; object-fit: cover;
         }
 
-        .card-container { display: flex; gap: 30px; margin-top: 20px; transition: 0.8s ease; }
+        .card-container { display: flex; gap: 30px; margin-top: 20px; }
 
         .card {
-            background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(15px);
+            background: rgba(15, 15, 15, 0.75); backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px;
             padding: 40px 20px; width: 220px; text-align: center;
             cursor: pointer; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -61,20 +53,25 @@
 
         .card.applicant { border-bottom: 5px solid var(--secondary-neon); }
         .card.status { border-bottom: 5px solid var(--warning-yellow); cursor: default; }
-        .card.admin { border-bottom: 5px solid var(--primary-neon); }
+        .card.admin { border-bottom: 5px solid var(--primary-neon); display: none; }
         
         .card:hover:not(.status) { transform: translateY(-15px); border-color: var(--primary-neon); }
 
-        .logout-link { margin-top: 40px; color: rgba(255,255,255,0.3); cursor: pointer; transition: 0.5s; }
+        .logout-link { 
+            margin-top: 40px; color: rgba(255,255,255,0.3); 
+            cursor: pointer; text-decoration: none; transition: 0.3s;
+            font-weight: 700; letter-spacing: 2px;
+        }
+        .logout-link:hover { color: var(--primary-neon); text-shadow: 0 0 10px var(--primary-neon); }
     </style>
 </head>
 <body>
     <div class="background" id="bg-main"></div>
     
     <div id="gateway">
-        <div id="user-profile">
-            <img id="user-avatar" src="https://via.placeholder.com/120" alt="Avatar">
-            <h1 id="user-name" style="margin:0; color:var(--primary-neon); font-size:3.5rem; text-transform:uppercase;">KUBIASOFFICIAL</h1>
+        <div id="user-profile" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 30px;">
+            <img id="user-avatar" src="" alt="Avatar" style="display:none;">
+            <h1 id="user-name" style="margin:0; color:var(--primary-neon); font-size:3.5rem; text-transform:uppercase; text-shadow: 0 0 20px rgba(188,19,254,0.4);">NAČÍTÁNÍ...</h1>
         </div>
 
         <div class="card-container">
@@ -86,7 +83,7 @@
             <div id="card-status" class="card status">
                 <div style="font-size: 45px;">🛡️</div>
                 <h3>STAV WL</h3>
-                <div style="color:var(--warning-yellow); font-weight:700;">NEZAŽÁDÁNO</div>
+                <div id="wl-label" style="color:var(--warning-yellow); font-weight:700;">ZJIŠŤUJI...</div>
             </div>
 
             <div id="btn-admin" class="card admin">
@@ -94,22 +91,54 @@
                 <h3>WL ADDER</h3>
             </div>
         </div>
-        <div class="logout-link" id="logout-btn">ODHLÁSIT SE</div>
+        <div class="logout-link" id="logout-btn" onclick="logout()">ODHLÁSIT SE</div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs",
+            authDomain: "cmrp-system.firebaseapp.com",
+            projectId: "cmrp-system",
+            storageBucket: "cmrp-system.firebasestorage.app",
+            messagingSenderId: "264321137651",
+            appId: "1:264321137651:web:295e93bd12e7f8b80fb086"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const user = JSON.parse(localStorage.getItem('discord_user'));
+        if (!user) { 
+            window.location.href = "/"; 
+        } else {
+            document.getElementById('user-name').innerText = user.username;
+            const img = document.getElementById('user-avatar');
+            img.src = user.avatar;
+            img.style.display = 'block';
+
+            onSnapshot(doc(db, "users", user.discordId), (ds) => {
+                if (ds.exists()) {
+                    const data = ds.data();
+                    document.getElementById('wl-label').innerText = data.wlStatus.toUpperCase();
+                    if (data.role === "admin") document.getElementById('btn-admin').style.display = "block";
+                }
+            });
+        }
+
         document.getElementById('btn-apply').onclick = function() {
-            // Spuštění animace rozstřelení
             document.getElementById('user-profile').classList.add('slide-up');
             document.getElementById('btn-apply').classList.add('slide-left');
             document.getElementById('btn-admin').classList.add('slide-right');
             document.getElementById('card-status').classList.add('slide-up');
-            document.getElementById('bg-main').classList.add('zoom-bg');
             document.getElementById('logout-btn').style.opacity = "0";
+            setTimeout(() => { window.location.href = "prihlaska.html"; }, 750);
+        };
 
-            setTimeout(() => {
-                window.location.href = "prihlaska.html";
-            }, 750);
+        window.logout = () => { 
+            localStorage.removeItem('discord_user'); 
+            window.location.href = "https://cmrp-system.vercel.app/"; 
         };
     </script>
 </body>
