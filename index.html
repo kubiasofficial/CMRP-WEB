@@ -25,31 +25,6 @@
             background-size: cover; background-position: center; z-index: -1;
         }
 
-        /* PROFILOVÁ ČÁST */
-        #user-profile {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 30px;
-            animation: fadeInDown 1s ease forwards;
-        }
-
-        .avatar-wrapper {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            margin-bottom: 15px;
-        }
-
-        #user-avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 3px solid var(--primary-neon);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
-            object-fit: cover;
-        }
-
         /* LOGIN SCREEN */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -68,16 +43,25 @@
             background-color: var(--discord-color); color: white;
             text-decoration: none; padding: 18px 40px; border-radius: 15px;
             font-weight: 700; transition: 0.3s; margin-top: 25px;
-            font-size: 1.1rem;
         }
 
-        .discord-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(88, 101, 242, 0.4); }
-
-        /* ROZCESTNÍK */
+        /* GATEWAY (VNITŘNÍ PANEL) */
         #gateway {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; perspective: 1500px;
             visibility: hidden; opacity: 0; transition: 1s ease;
+        }
+
+        /* PROFILOVÁ SEKCE */
+        #user-profile {
+            display: none; flex-direction: column; align-items: center; margin-bottom: 40px;
+            animation: fadeInDown 1s ease forwards;
+        }
+
+        #user-avatar {
+            width: 100px; height: 100px; border-radius: 50%;
+            border: 3px solid var(--primary-neon); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+            margin-bottom: 15px; object-fit: cover;
         }
 
         .card-container { display: flex; gap: 50px; transform-style: preserve-3d; }
@@ -93,7 +77,7 @@
         .card.admin { transform: rotateY(-15deg); border-bottom: 5px solid var(--primary-neon); }
         .card:hover { transform: rotateY(0deg) translateZ(100px); background: rgba(255,255,255,0.1); }
 
-        /* POMOCNÉ TŘÍDY */
+        /* LOGGED IN STAV */
         .logged-in #login-overlay { opacity: 0; visibility: hidden; pointer-events: none; }
         .logged-in #gateway { visibility: visible; opacity: 1; }
 
@@ -102,10 +86,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .logout-btn {
-            margin-top: 40px; background: transparent; border: 1px solid rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.5); padding: 8px 20px; border-radius: 8px; cursor: pointer;
-        }
+        .logout-link { margin-top: 30px; color: rgba(255,255,255,0.3); cursor: pointer; text-decoration: underline; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -114,11 +95,10 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <img src="cmrp.png" alt="Logo" style="width: 140px; margin-bottom: 20px;">
-            <h1 style="letter-spacing: 5px; font-size: 2.5rem; margin: 0;">CMRP</h1>
-            <p style="color: #888; text-transform: uppercase; letter-spacing: 2px;">Vstup do interního systému</p>
+            <img src="cmrp.png" alt="Logo" style="width: 120px; margin-bottom: 20px;">
+            <h1 style="letter-spacing: 5px; margin: 0;">CMRP SYSTÉM</h1>
             <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" class="discord-btn">
-                <span>PŘIHLÁSIT PŘES DISCORD</span>
+                PŘIHLÁSIT PŘES DISCORD
             </a>
         </div>
     </div>
@@ -126,33 +106,32 @@
     <div id="gateway">
         
         <div id="user-profile">
-            <div class="avatar-wrapper">
-                <img id="user-avatar" src="" alt="Avatar">
-            </div>
-            <h2 style="margin: 0; font-weight: 500;">VÍTEJTE ZPĚT,</h2>
-            <h1 id="user-name" style="margin: 0; color: var(--primary-neon); text-transform: uppercase; font-size: 3rem; letter-spacing: 4px;">HOST</h1>
+            <img id="user-avatar" src="" alt="Avatar">
+            <h2 style="margin: 0; font-weight: 500; letter-spacing: 2px;">VÍTEJTE ZPĚT,</h2>
+            <h1 id="user-name" style="margin: 0; color: var(--primary-neon); font-size: 3rem; letter-spacing: 4px; text-transform: uppercase;">HRÁČI</h1>
         </div>
 
         <div class="card-container">
             <div id="btn-apply" class="card applicant">
                 <div style="font-size: 70px; margin-bottom: 20px;">📄</div>
-                <h2 style="margin: 0; letter-spacing: 2px;">PŘIHLÁŠKA</h2>
-                <p style="color: #aaa; font-size: 0.9rem;">Podat žádost o whitelist</p>
+                <h2>PŘIHLÁŠKA</h2>
+                <p style="color: #888;">Nábor do komunity</p>
             </div>
             <div id="btn-admin" class="card admin">
                 <div style="font-size: 70px; margin-bottom: 20px;">👔</div>
-                <h2 style="margin: 0; letter-spacing: 2px;">WL ADDER</h2>
-                <p style="color: #aaa; font-size: 0.9rem;">Správa a kontrola žádostí</p>
+                <h2>WL ADDER</h2>
+                <p style="color: #888;">Správa systému</p>
             </div>
         </div>
 
-        <button class="logout-btn" onclick="logout()">ODHLÁSIT SE</button>
+        <div class="logout-link" onclick="logout()">Odhlásit se z jiného účtu</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Tvá Firebase konfigurace
         const firebaseConfig = {
             apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs",
             authDomain: "cmrp-system.firebaseapp.com",
@@ -165,41 +144,50 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Funkce pro získání dat z Discordu
-        async function fetchDiscordUser(code) {
-            // POZOR: Tato část vyžaduje Vercel function pro plnou funkčnost s Tokenem.
-            // Pro teď použijeme simulaci, která uloží jméno "UŽIVATEL", 
-            // dokud nenasadíme backendovou část pro výměnu Tokenu.
-            return {
-                username: "Hráč",
-                avatar: "https://cdn.discordapp.com/embed/avatars/0.png"
-            };
-        }
-
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const savedUser = localStorage.getItem('discord_user');
 
-            if (code || savedUser) {
-                document.body.classList.add('logged-in');
-                document.getElementById('user-profile').style.display = 'flex';
+            if (savedUser) {
+                renderUser(JSON.parse(savedUser));
+            } 
+            else if (code) {
+                document.body.classList.add('logged-in'); // Okamžitý vizuální efekt
+                
+                try {
+                    // Zavoláme naši novou bezpečnou API funkci na Vercelu
+                    const response = await fetch(`/api/auth?code=${code}`);
+                    const data = await response.json();
 
-                let userData;
-                if (code) {
-                    // Tady se pokusíme načíst data (prozatím placeholder)
-                    userData = { username: "Ověřený člen", avatar: "https://cdn.discordapp.com/embed/avatars/1.png" };
-                    localStorage.setItem('discord_user', JSON.stringify(userData));
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                } else {
-                    userData = JSON.parse(savedUser);
+                    if (data.id) {
+                        const user = {
+                            username: data.username,
+                            avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
+                        };
+                        
+                        localStorage.setItem('discord_user', JSON.stringify(user));
+                        renderUser(user);
+                        
+                        // Zároveň uložíme záznam do Firestore pro tvou statistiku
+                        await setDoc(doc(db, "users", data.id), {
+                            username: data.username,
+                            lastLogin: new Date().toISOString()
+                        });
+                    }
+                } catch (err) {
+                    console.error("Autentizace selhala:", err);
                 }
-
-                // Aktualizace UI
-                document.getElementById('user-name').innerText = userData.username;
-                document.getElementById('user-avatar').src = userData.avatar;
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         };
+
+        function renderUser(user) {
+            document.body.classList.add('logged-in');
+            document.getElementById('user-profile').style.display = 'flex';
+            document.getElementById('user-name').innerText = user.username;
+            document.getElementById('user-avatar').src = user.avatar;
+        }
 
         window.logout = function() {
             localStorage.removeItem('discord_user');
