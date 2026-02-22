@@ -22,10 +22,12 @@
 
         .background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(5, 5, 5, 0.8), rgba(5, 5, 5, 0.95)), url('pozadi.png');
+            /* Použití tvého nového pozadí s tmavým filtrem pro čitelnost */
+            background: linear-gradient(rgba(5, 5, 5, 0.7), rgba(5, 5, 5, 0.9)), url('pozadicko.jpg');
             background-size: cover; background-position: center; z-index: -1;
         }
 
+        /* LOGIN SCREEN */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(25px);
@@ -43,11 +45,11 @@
             background-color: var(--discord-color); color: white;
             text-decoration: none; padding: 18px 40px; border-radius: 15px;
             font-weight: 700; transition: 0.3s; margin-top: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         .discord-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4); }
 
+        /* MAIN GATEWAY */
         #gateway {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; perspective: 1500px;
@@ -67,7 +69,7 @@
         .card-container { display: flex; gap: 30px; transform-style: preserve-3d; }
 
         .card {
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 25px;
             padding: 40px 20px; width: 220px; text-align: center;
             cursor: pointer; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -79,8 +81,8 @@
         
         .card:hover:not(.status) { 
             transform: translateZ(50px); 
-            background: rgba(188, 19, 254, 0.05); 
-            border-color: rgba(188, 19, 254, 0.3);
+            background: rgba(188, 19, 254, 0.1); 
+            border-color: rgba(188, 19, 254, 0.4);
         }
 
         .status-text { font-size: 1.2rem; font-weight: 700; margin-top: 10px; }
@@ -91,7 +93,7 @@
         .logged-in #login-overlay { opacity: 0; visibility: hidden; pointer-events: none; }
         .logged-in #gateway { visibility: visible; opacity: 1; }
 
-        .logout-link { margin-top: 30px; color: rgba(255,255,255,0.2); cursor: pointer; text-decoration: none; font-size: 0.9rem; }
+        .logout-link { margin-top: 30px; color: rgba(255,255,255,0.2); cursor: pointer; text-decoration: none; font-size: 0.9rem; letter-spacing: 1px; }
         .logout-link:hover { color: var(--primary-neon); }
     </style>
 </head>
@@ -101,7 +103,7 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <img src="cmrp.png" alt="Logo" style="width: 250px; margin-bottom: 20px;">
+            <img src="cmrp.png" alt="Logo" style="width: 280px; margin-bottom: 20px;">
             <h1 style="letter-spacing: 7px; margin: 0; color: var(--primary-neon);">SYSTÉM</h1>
             <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" class="discord-btn">
                 PŘIHLÁSIT PŘES DISCORD
@@ -113,7 +115,7 @@
         <div id="user-profile">
             <img id="user-avatar" src="" alt="Avatar">
             <h2 style="margin: 0; font-weight: 500; letter-spacing: 2px; color: #aaa;">VÍTEJTE ZPĚT,</h2>
-            <h1 id="user-name" style="margin: 0; color: var(--primary-neon); font-size: 3.5rem; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 20px rgba(188, 19, 254, 0.4);">HRÁČI</h1>
+            <h1 id="user-name" style="margin: 0; color: var(--primary-neon); font-size: 3.5rem; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 25px rgba(188, 19, 254, 0.5);">HRÁČI</h1>
             <p id="user-id-display" style="color: rgba(255,255,255,0.1); font-size: 0.8rem; margin-top: 5px;"></p>
         </div>
 
@@ -184,7 +186,7 @@
                         await checkAndCreateUser(user);
                         setupRealtimeUpdates(user.discordId);
                     }
-                } catch (err) { console.error("Chyba:", err); }
+                } catch (err) { console.error("Chyba přihlášení:", err); }
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         };
