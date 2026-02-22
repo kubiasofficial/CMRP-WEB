@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-neon: #00f2ff;
-            --secondary-neon: #00ff88;
+            --primary-neon: #bc13fe; /* Fialová z loga */
+            --secondary-neon: #00f2ff; /* Modrá z loga */
             --warning-yellow: #ffcc00;
             --discord-color: #5865F2;
         }
@@ -22,11 +22,10 @@
 
         .background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.95)), url('pozadi.png');
+            background: linear-gradient(rgba(5, 5, 5, 0.8), rgba(5, 5, 5, 0.95)), url('pozadi.png');
             background-size: cover; background-position: center; z-index: -1;
         }
 
-        /* LOGIN SCREEN */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(25px);
@@ -34,9 +33,9 @@
         }
 
         .login-box {
-            background: rgba(255, 255, 255, 0.02); border: 1px solid var(--primary-neon);
+            background: rgba(188, 19, 254, 0.03); border: 2px solid var(--primary-neon);
             padding: 60px; border-radius: 40px; text-align: center;
-            box-shadow: 0 0 60px rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 50px rgba(188, 19, 254, 0.15);
         }
 
         .discord-btn {
@@ -44,9 +43,11 @@
             background-color: var(--discord-color); color: white;
             text-decoration: none; padding: 18px 40px; border-radius: 15px;
             font-weight: 700; transition: 0.3s; margin-top: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
-        /* GATEWAY (MAIN PANEL) */
+        .discord-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4); }
+
         #gateway {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; perspective: 1500px;
@@ -58,16 +59,16 @@
         }
 
         #user-avatar {
-            width: 100px; height: 100px; border-radius: 50%;
-            border: 3px solid var(--primary-neon); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+            width: 110px; height: 110px; border-radius: 50%;
+            border: 3px solid var(--primary-neon); box-shadow: 0 0 25px rgba(188, 19, 254, 0.5);
             margin-bottom: 15px; object-fit: cover;
         }
 
         .card-container { display: flex; gap: 30px; transform-style: preserve-3d; }
 
         .card {
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px;
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 25px;
             padding: 40px 20px; width: 220px; text-align: center;
             cursor: pointer; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -76,17 +77,22 @@
         .card.status { border-bottom: 5px solid var(--warning-yellow); cursor: default; }
         .card.admin { border-bottom: 5px solid var(--primary-neon); display: none; }
         
-        .card:hover:not(.status) { transform: translateZ(50px); background: rgba(255,255,255,0.1); }
+        .card:hover:not(.status) { 
+            transform: translateZ(50px); 
+            background: rgba(188, 19, 254, 0.05); 
+            border-color: rgba(188, 19, 254, 0.3);
+        }
 
         .status-text { font-size: 1.2rem; font-weight: 700; margin-top: 10px; }
-        .status-pending { color: var(--warning-yellow); }
-        .status-approved { color: var(--secondary-neon); }
+        .status-pending { color: var(--warning-yellow); text-shadow: 0 0 10px rgba(255, 204, 0, 0.3); }
+        .status-approved { color: var(--secondary-neon); text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
         .status-rejected { color: #ff4b4b; }
 
         .logged-in #login-overlay { opacity: 0; visibility: hidden; pointer-events: none; }
         .logged-in #gateway { visibility: visible; opacity: 1; }
 
-        .logout-link { margin-top: 30px; color: rgba(255,255,255,0.3); cursor: pointer; text-decoration: underline; }
+        .logout-link { margin-top: 30px; color: rgba(255,255,255,0.2); cursor: pointer; text-decoration: none; font-size: 0.9rem; }
+        .logout-link:hover { color: var(--primary-neon); }
     </style>
 </head>
 <body>
@@ -95,8 +101,8 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <img src="cmrp.png" alt="Logo" style="width: 120px; margin-bottom: 20px;">
-            <h1 style="letter-spacing: 5px; margin: 0;">CMRP SYSTÉM</h1>
+            <img src="cmrp.png" alt="Logo" style="width: 250px; margin-bottom: 20px;">
+            <h1 style="letter-spacing: 7px; margin: 0; color: var(--primary-neon);">SYSTÉM</h1>
             <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" class="discord-btn">
                 PŘIHLÁSIT PŘES DISCORD
             </a>
@@ -106,33 +112,33 @@
     <div id="gateway">
         <div id="user-profile">
             <img id="user-avatar" src="" alt="Avatar">
-            <h2 style="margin: 0; font-weight: 500; letter-spacing: 2px;">VÍTEJTE ZPĚT,</h2>
-            <h1 id="user-name" style="margin: 0; color: var(--primary-neon); font-size: 3rem; letter-spacing: 4px; text-transform: uppercase;">HRÁČI</h1>
-            <p id="user-id-display" style="color: rgba(255,255,255,0.2); font-size: 0.8rem;"></p>
+            <h2 style="margin: 0; font-weight: 500; letter-spacing: 2px; color: #aaa;">VÍTEJTE ZPĚT,</h2>
+            <h1 id="user-name" style="margin: 0; color: var(--primary-neon); font-size: 3.5rem; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 20px rgba(188, 19, 254, 0.4);">HRÁČI</h1>
+            <p id="user-id-display" style="color: rgba(255,255,255,0.1); font-size: 0.8rem; margin-top: 5px;"></p>
         </div>
 
         <div class="card-container">
             <div id="btn-apply" class="card applicant">
-                <div style="font-size: 50px; margin-bottom: 10px;">📄</div>
+                <div style="font-size: 50px; margin-bottom: 10px; filter: drop-shadow(0 0 10px var(--secondary-neon));">📄</div>
                 <h3>PŘIHLÁŠKA</h3>
-                <p style="color: #888; font-size: 0.8rem;">Nábor do komunity</p>
+                <p style="color: #666; font-size: 0.8rem;">Nábor do komunity</p>
             </div>
 
             <div class="card status">
-                <div style="font-size: 50px; margin-bottom: 10px;">🛡️</div>
+                <div style="font-size: 50px; margin-bottom: 10px; filter: drop-shadow(0 0 10px var(--warning-yellow));">🛡️</div>
                 <h3>STAV WL</h3>
                 <div id="wl-status-label" class="status-text">NAČÍTÁNÍ...</div>
-                <p id="wl-info" style="color: #888; font-size: 0.7rem; margin-top: 5px;"></p>
+                <p id="wl-info" style="color: #666; font-size: 0.7rem; margin-top: 5px;"></p>
             </div>
 
             <div id="btn-admin" class="card admin">
-                <div style="font-size: 50px; margin-bottom: 10px;">👔</div>
+                <div style="font-size: 50px; margin-bottom: 10px; filter: drop-shadow(0 0 10px var(--primary-neon));">👔</div>
                 <h3>WL ADDER</h3>
-                <p style="color: #888; font-size: 0.8rem;">Správa systému</p>
+                <p style="color: #666; font-size: 0.8rem;">Správa systému</p>
             </div>
         </div>
         
-        <div class="logout-link" onclick="logout()">Odhlásit se</div>
+        <div class="logout-link" onclick="logout()">ODHLÁSIT SE</div>
     </div>
 
     <script type="module">
@@ -183,7 +189,6 @@
             }
         };
 
-        // Funkce pro automatické vytvoření uživatele s 3 pokusy, pokud v DB chybí
         async function checkAndCreateUser(user) {
             const userRef = doc(db, "users", user.discordId);
             const snap = await getDoc(userRef);
@@ -200,14 +205,11 @@
             }
         }
 
-        // Realtime sledování změn (pokusy, status, admin role)
         function setupRealtimeUpdates(userId) {
             onSnapshot(doc(db, "users", userId), (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     updateStatusCard(data);
-                    
-                    // Zobrazení karty pro admina
                     document.getElementById('btn-admin').style.display = (data.role === "admin") ? "block" : "none";
                 }
             });
@@ -244,7 +246,6 @@
             document.getElementById('user-id-display').innerText = `ID: ${user.discordId}`;
         }
 
-        // LOGIKA TLAČÍTKA PŘIHLÁŠKA
         document.getElementById('btn-apply').onclick = async function() {
             const savedUser = localStorage.getItem('discord_user');
             if (!savedUser) return alert("Musíš se nejdřív přihlásit!");
@@ -254,18 +255,13 @@
             
             if (userSnap.exists()) {
                 const data = userSnap.data();
-
                 if (data.wlStatus === "approved") return alert("Už jsi na Allowlistu!");
                 if (data.wlStatus === "pending") return alert("Tvoje žádost už čeká na schválení!");
                 if (data.attemptsLeft <= 0) return alert("Vyčerpal jsi všechny 3 pokusy.");
-
-                // Kontrola 24h limitu při zamítnutí
                 if (data.wlStatus === "rejected" && data.lastAttempt) {
                     const diff = (new Date() - new Date(data.lastAttempt)) / (1000 * 60 * 60);
                     if (diff < 24) return alert(`Další pokus můžeš podat za ${Math.ceil(24 - diff)} hodin.`);
                 }
-
-                // Pokud je vše OK, jde se na věc
                 window.location.href = "prihlaska.html";
             }
         };
