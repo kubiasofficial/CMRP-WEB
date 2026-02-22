@@ -17,20 +17,32 @@
             margin: 0; padding: 0; min-height: 100vh;
             font-family: 'Rajdhani', sans-serif;
             color: white; background-color: #000;
-            overflow-x: hidden;
+            overflow: hidden; /* Zabrání scrollování při animaci */
         }
 
+        /* OPRAVA POZADÍ */
         .background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.85)), url('pozadicko.jpg');
-            background-size: cover; background-position: center; background-repeat: no-repeat;
-            z-index: -1;
+            /* Důležité: cesta k obrázku a tmavý filtr */
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.85)), url('pozadicko.jpg');
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat;
+            z-index: -2;
+            transition: transform 1s ease-in-out;
         }
+
+        /* ANIMACE PŘI ODCHODU */
+        .fade-out { opacity: 0 !important; transform: scale(1.1); transition: 0.8s ease-in-out; }
+        .slide-left { transform: translateX(-150%) rotate(-10deg) !important; opacity: 0 !important; }
+        .slide-right { transform: translateX(150%) rotate(10deg) !important; opacity: 0 !important; }
+        .slide-up { transform: translateY(-150%) !important; opacity: 0 !important; }
 
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(20px);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
+            transition: 0.5s;
         }
 
         .login-box {
@@ -46,8 +58,6 @@
             font-weight: 700; transition: 0.3s; margin-top: 25px;
         }
 
-        .discord-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 20px rgba(88, 101, 242, 0.4); }
-
         #gateway {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; 
@@ -57,43 +67,43 @@
         .logged-in #login-overlay { opacity: 0; visibility: hidden; pointer-events: none; }
         .logged-in #gateway { visibility: visible; opacity: 1; }
 
+        #user-profile { transition: 0.8s ease-in-out; }
         #user-avatar {
-            width: 110px; height: 110px; border-radius: 50%;
-            border: 3px solid var(--primary-neon); box-shadow: 0 0 25px rgba(188, 19, 254, 0.5);
+            width: 120px; height: 120px; border-radius: 50%;
+            border: 3px solid var(--primary-neon); box-shadow: 0 0 30px rgba(188, 19, 254, 0.6);
             margin-bottom: 15px; object-fit: cover;
         }
 
-        .card-container { display: flex; gap: 30px; margin-top: 20px; }
+        .card-container { display: flex; gap: 30px; margin-top: 20px; transition: 0.8s ease-in-out; }
 
         .card {
-            background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(10px);
+            background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px;
             padding: 40px 20px; width: 220px; text-align: center;
-            cursor: pointer; transition: 0.4s;
+            cursor: pointer; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .card.applicant { border-bottom: 5px solid var(--secondary-neon); }
         .card.status { border-bottom: 5px solid var(--warning-yellow); cursor: default; }
         .card.admin { border-bottom: 5px solid var(--primary-neon); display: none; }
         
-        .card:hover:not(.status) { transform: translateY(-10px); background: rgba(188, 19, 254, 0.15); border-color: var(--primary-neon); }
+        .card:hover:not(.status) { transform: translateY(-15px) scale(1.05); background: rgba(188, 19, 254, 0.15); border-color: var(--primary-neon); }
 
-        .status-text { font-size: 1.2rem; font-weight: 700; margin-top: 10px; text-transform: uppercase; }
-        .status-pending { color: var(--warning-yellow); }
-        .status-approved { color: var(--secondary-neon); }
-        .status-rejected { color: #ff4b4b; }
+        .status-text { font-size: 1.2rem; font-weight: 700; margin-top: 10px; letter-spacing: 1px; }
+        .status-none { color: #888; }
+        .status-pending { color: var(--warning-yellow); text-shadow: 0 0 10px rgba(255,204,0,0.4); }
 
-        .logout-link { margin-top: 40px; color: rgba(255,255,255,0.4); cursor: pointer; text-decoration: none; font-size: 0.9rem; }
-        .logout-link:hover { color: var(--primary-neon); text-decoration: underline; }
+        .logout-link { margin-top: 40px; color: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; }
+        .logout-link:hover { color: var(--primary-neon); }
     </style>
 </head>
 <body>
-    <div class="background"></div>
+    <div class="background" id="bg-img"></div>
     
     <div id="login-overlay">
         <div class="login-box">
             <img src="cmrp.png" alt="Logo" style="width: 250px; margin-bottom: 20px;">
-            <h2 style="letter-spacing: 5px; color: var(--primary-neon);">SYSTÉM</h2>
+            <h2 style="letter-spacing: 5px; color: var(--primary-neon); margin: 0;">SYSTÉM</h2>
             <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" class="discord-btn">PŘIHLÁSIT PŘES DISCORD</a>
         </div>
     </div>
@@ -101,30 +111,31 @@
     <div id="gateway">
         <div id="user-profile" style="display:none; flex-direction:column; align-items:center; margin-bottom: 30px;">
             <img id="user-avatar" src="" alt="Avatar">
-            <h1 id="user-name" style="margin:0; color:var(--primary-neon); font-size:3.5rem; text-transform:uppercase; text-shadow: 0 0 20px rgba(188,19,254,0.4);">HRÁČ</h1>
+            <h1 id="user-name" style="margin:0; color:var(--primary-neon); font-size:3.5rem; text-transform:uppercase; text-shadow: 0 0 25px rgba(188,19,254,0.5);">HRÁČ</h1>
+            <p id="user-id-display" style="color: rgba(255,255,255,0.1); font-size: 0.7rem;"></p>
         </div>
 
-        <div class="card-container">
+        <div class="card-container" id="cards">
             <div id="btn-apply" class="card applicant">
-                <div style="font-size: 40px; margin-bottom: 10px;">📄</div>
-                <h3>PŘIHLÁŠKA</h3>
-                <p style="font-size: 0.8rem; color: #888;">Nábor do komunity</p>
+                <div style="font-size: 45px; margin-bottom: 10px;">📄</div>
+                <h3 style="margin:0;">PŘIHLÁŠKA</h3>
+                <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Nábor do komunity</p>
             </div>
             
-            <div class="card status">
-                <div style="font-size: 40px; margin-bottom: 10px;">🛡️</div>
-                <h3>STAV WL</h3>
+            <div id="card-status" class="card status">
+                <div style="font-size: 45px; margin-bottom: 10px;">🛡️</div>
+                <h3 style="margin:0;">STAV WL</h3>
                 <div id="wl-status-label" class="status-text">NAČÍTÁNÍ...</div>
-                <p id="wl-info" style="font-size: 0.7rem; color: #888; margin-top: 5px;"></p>
+                <p id="wl-info" style="font-size: 0.7rem; color: #666; margin-top: 5px;"></p>
             </div>
 
             <div id="btn-admin" class="card admin">
-                <div style="font-size: 40px; margin-bottom: 10px;">👔</div>
-                <h3>WL ADDER</h3>
-                <p style="font-size: 0.8rem; color: #888;">Správa systému</p>
+                <div style="font-size: 45px; margin-bottom: 10px;">👔</div>
+                <h3 style="margin:0;">WL ADDER</h3>
+                <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Správa systému</p>
             </div>
         </div>
-        <div class="logout-link" onclick="logout()">ODHLÁSIT SE</div>
+        <div class="logout-link" id="logout-btn" onclick="logout()">ODHLÁSIT SE</div>
     </div>
 
     <script type="module">
@@ -185,7 +196,7 @@
                     const label = document.getElementById('wl-status-label');
                     const info = document.getElementById('wl-info');
                     
-                    label.innerText = data.wlStatus === "none" ? "NEZAŽÁDÁNO" : data.wlStatus;
+                    label.innerText = data.wlStatus === "none" ? "NEZAŽÁDÁNO" : data.wlStatus.toUpperCase();
                     label.className = `status-text status-${data.wlStatus}`;
                     info.innerText = `Zbývající pokusy: ${data.attemptsLeft}/3`;
                     
@@ -199,9 +210,25 @@
             document.getElementById('user-profile').style.display = 'flex';
             document.getElementById('user-name').innerText = user.username;
             document.getElementById('user-avatar').src = user.avatar;
+            document.getElementById('user-id-display').innerText = `ID: ${user.discordId}`;
         }
 
-        document.getElementById('btn-apply').onclick = () => window.location.href = "prihlaska.html";
+        // ANIMOVANÝ PŘECHOD NA PŘIHLÁŠKU
+        document.getElementById('btn-apply').onclick = function() {
+            // Přidání animací prvkům
+            document.getElementById('user-profile').classList.add('slide-up');
+            document.getElementById('btn-apply').classList.add('slide-left');
+            document.getElementById('btn-admin').classList.add('slide-right');
+            document.getElementById('card-status').classList.add('fade-out');
+            document.getElementById('logout-btn').classList.add('fade-out');
+            document.getElementById('bg-img').style.transform = "scale(1.2)";
+
+            // Přesměrování po dokončení animace
+            setTimeout(() => {
+                window.location.href = "prihlaska.html";
+            }, 700);
+        };
+
         window.logout = () => { localStorage.removeItem('discord_user'); window.location.href = "/"; };
     </script>
 </body>
