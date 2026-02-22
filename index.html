@@ -22,10 +22,11 @@
 
         .background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('pozadi.png');
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.95)), url('pozadi.png');
             background-size: cover; background-position: center; z-index: -1;
         }
 
+        /* LOGIN SCREEN */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(25px);
@@ -35,6 +36,7 @@
         .login-box {
             background: rgba(255, 255, 255, 0.02); border: 1px solid var(--primary-neon);
             padding: 60px; border-radius: 40px; text-align: center;
+            box-shadow: 0 0 60px rgba(0, 242, 255, 0.1);
         }
 
         .discord-btn {
@@ -44,6 +46,7 @@
             font-weight: 700; transition: 0.3s; margin-top: 25px;
         }
 
+        /* GATEWAY (MAIN PANEL) */
         #gateway {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; perspective: 1500px;
@@ -175,41 +178,37 @@
                         await checkAndCreateUser(user);
                         setupRealtimeUpdates(user.discordId);
                     }
-                } catch (err) { console.error("Chyba přihlášení:", err); }
+                } catch (err) { console.error("Chyba:", err); }
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         };
 
+        // Funkce pro automatické vytvoření uživatele s 3 pokusy, pokud v DB chybí
         async function checkAndCreateUser(user) {
             const userRef = doc(db, "users", user.discordId);
             const snap = await getDoc(userRef);
-            
-            // Pokud uživatel neexistuje, nebo mu chybí pole wlStatus, vytvoříme/aktualizujeme ho
-            if (!snap.exists() || !snap.data().wlStatus) {
+            if (!snap.exists()) {
                 await setDoc(userRef, {
                     discordId: user.discordId,
                     username: user.username,
                     avatar: user.avatar,
-                    wlStatus: snap.exists() ? (snap.data().wlStatus || "none") : "none",
-                    attemptsLeft: snap.exists() ? (snap.data().attemptsLeft || 3) : 3,
-                    role: snap.exists() ? (snap.data().role || "user") : "user",
+                    wlStatus: "none",
+                    attemptsLeft: 3,
+                    role: "user",
                     lastLogin: new Date().toISOString()
-                }, { merge: true });
+                });
             }
         }
 
+        // Realtime sledování změn (pokusy, status, admin role)
         function setupRealtimeUpdates(userId) {
             onSnapshot(doc(db, "users", userId), (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     updateStatusCard(data);
                     
-                    const adminCard = document.getElementById('btn-admin');
-                    if (data.role === "admin") {
-                        adminCard.style.display = "block";
-                    } else {
-                        adminCard.style.display = "none";
-                    }
+                    // Zobrazení karty pro admina
+                    document.getElementById('btn-admin').style.display = (data.role === "admin") ? "block" : "none";
                 }
             });
         }
@@ -218,26 +217,22 @@
             const label = document.getElementById('wl-status-label');
             const info = document.getElementById('wl-info');
             
-            // Ošetření případu, kdyby data ještě nebyla v DB úplná
-            const status = data.wlStatus || "none";
-            const attempts = data.attemptsLeft !== undefined ? data.attemptsLeft : 3;
-
-            if (status === "none") {
+            if (data.wlStatus === "none") {
                 label.innerText = "NEZAŽÁDÁNO";
                 label.className = "status-text";
-                info.innerText = `Zbývající pokusy: ${attempts}/3`;
-            } else if (status === "pending") {
+                info.innerText = `Zbývající pokusy: ${data.attemptsLeft}/3`;
+            } else if (data.wlStatus === "pending") {
                 label.innerText = "ČEKÁ NA SCHVÁLENÍ";
                 label.className = "status-text status-pending";
-                info.innerText = "Adder brzy posoudí tvou žádost.";
-            } else if (status === "approved") {
-                label.innerText = "SCHVÁLENO";
+                info.innerText = "Tvá přihláška se právě posuzuje.";
+            } else if (data.wlStatus === "approved") {
+                label.innerText = "ALLOWLIST: ANO";
                 label.className = "status-text status-approved";
                 info.innerText = `Schválil: ${data.assignedAdder || 'Admin'}`;
-            } else if (status === "rejected") {
+            } else if (data.wlStatus === "rejected") {
                 label.innerText = "ZAMÍTNUTO";
                 label.className = "status-text status-rejected";
-                info.innerText = `Důvod: ${data.rejectReason || 'Neuveden'}`;
+                info.innerText = `Zbývá pokusů: ${data.attemptsLeft}/3. Důvod: ${data.rejectReason || 'Neuveden'}`;
             }
         }
 
@@ -248,6 +243,32 @@
             document.getElementById('user-avatar').src = user.avatar;
             document.getElementById('user-id-display').innerText = `ID: ${user.discordId}`;
         }
+
+        // LOGIKA TLAČÍTKA PŘIHLÁŠKA
+        document.getElementById('btn-apply').onclick = async function() {
+            const savedUser = localStorage.getItem('discord_user');
+            if (!savedUser) return alert("Musíš se nejdřív přihlásit!");
+
+            const user = JSON.parse(savedUser);
+            const userSnap = await getDoc(doc(db, "users", user.discordId));
+            
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+
+                if (data.wlStatus === "approved") return alert("Už jsi na Allowlistu!");
+                if (data.wlStatus === "pending") return alert("Tvoje žádost už čeká na schválení!");
+                if (data.attemptsLeft <= 0) return alert("Vyčerpal jsi všechny 3 pokusy.");
+
+                // Kontrola 24h limitu při zamítnutí
+                if (data.wlStatus === "rejected" && data.lastAttempt) {
+                    const diff = (new Date() - new Date(data.lastAttempt)) / (1000 * 60 * 60);
+                    if (diff < 24) return alert(`Další pokus můžeš podat za ${Math.ceil(24 - diff)} hodin.`);
+                }
+
+                // Pokud je vše OK, jde se na věc
+                window.location.href = "prihlaska.html";
+            }
+        };
 
         window.logout = function() {
             localStorage.removeItem('discord_user');
