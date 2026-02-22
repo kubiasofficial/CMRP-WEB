@@ -9,8 +9,8 @@
         :root {
             --primary-neon: #00f2ff;
             --secondary-neon: #00ff88;
+            --warning-yellow: #ffcc00;
             --discord-color: #5865F2;
-            --error-red: #ff4b4b;
         }
 
         body, html {
@@ -36,7 +36,6 @@
         .login-box {
             background: rgba(255, 255, 255, 0.02); border: 1px solid var(--primary-neon);
             padding: 60px; border-radius: 40px; text-align: center;
-            box-shadow: 0 0 60px rgba(0, 242, 255, 0.1);
         }
 
         .discord-btn {
@@ -44,10 +43,9 @@
             background-color: var(--discord-color); color: white;
             text-decoration: none; padding: 18px 40px; border-radius: 15px;
             font-weight: 700; transition: 0.3s; margin-top: 25px;
-            cursor: pointer;
         }
 
-        /* GATEWAY (PANEL) */
+        /* GATEWAY */
         #gateway {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; perspective: 1500px;
@@ -56,7 +54,6 @@
 
         #user-profile {
             display: none; flex-direction: column; align-items: center; margin-bottom: 40px;
-            animation: fadeInDown 1s ease forwards;
         }
 
         #user-avatar {
@@ -65,26 +62,28 @@
             margin-bottom: 15px; object-fit: cover;
         }
 
-        .card-container { display: flex; gap: 50px; transform-style: preserve-3d; }
+        .card-container { display: flex; gap: 30px; transform-style: preserve-3d; }
 
         .card {
             background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px;
-            padding: 60px 40px; width: 280px; text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px;
+            padding: 40px 20px; width: 220px; text-align: center;
             cursor: pointer; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .card.applicant { transform: rotateY(15deg); border-bottom: 5px solid var(--secondary-neon); }
-        .card.admin { transform: rotateY(-15deg); border-bottom: 5px solid var(--primary-neon); }
-        .card:hover { transform: rotateY(0deg) translateZ(100px); background: rgba(255,255,255,0.1); }
+        .card.applicant { border-bottom: 5px solid var(--secondary-neon); }
+        .card.status { border-bottom: 5px solid var(--warning-yellow); cursor: default; }
+        .card.admin { border-bottom: 5px solid var(--primary-neon); }
+        
+        .card:hover:not(.status) { transform: translateZ(50px); background: rgba(255,255,255,0.1); }
+
+        .status-text { font-size: 1.2rem; font-weight: 700; margin-top: 10px; }
+        .status-pending { color: var(--warning-yellow); }
+        .status-approved { color: var(--secondary-neon); }
+        .status-rejected { color: #ff4b4b; }
 
         .logged-in #login-overlay { opacity: 0; visibility: hidden; pointer-events: none; }
         .logged-in #gateway { visibility: visible; opacity: 1; }
-
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
 
         .logout-link { margin-top: 30px; color: rgba(255,255,255,0.3); cursor: pointer; text-decoration: underline; }
     </style>
@@ -108,27 +107,36 @@
             <img id="user-avatar" src="" alt="Avatar">
             <h2 style="margin: 0; font-weight: 500; letter-spacing: 2px;">VÍTEJTE ZPĚT,</h2>
             <h1 id="user-name" style="margin: 0; color: var(--primary-neon); font-size: 3rem; letter-spacing: 4px; text-transform: uppercase;">HRÁČI</h1>
-            <p id="user-id-display" style="color: rgba(255,255,255,0.2); font-size: 0.8rem; margin-top: 5px;"></p>
+            <p id="user-id-display" style="color: rgba(255,255,255,0.2); font-size: 0.8rem;"></p>
         </div>
 
         <div class="card-container">
             <div id="btn-apply" class="card applicant">
-                <div style="font-size: 70px; margin-bottom: 20px;">📄</div>
-                <h2>PŘIHLÁŠKA</h2>
-                <p style="color: #888;">Nábor do komunity</p>
+                <div style="font-size: 50px; margin-bottom: 10px;">📄</div>
+                <h3>PŘIHLÁŠKA</h3>
+                <p style="color: #888; font-size: 0.8rem;">Nábor do komunity</p>
             </div>
-            <div id="btn-admin" class="card admin">
-                <div style="font-size: 70px; margin-bottom: 20px;">👔</div>
-                <h2>WL ADDER</h2>
-                <p style="color: #888;">Správa systému</p>
+
+            <div class="card status">
+                <div style="font-size: 50px; margin-bottom: 10px;">🛡️</div>
+                <h3>STAV WL</h3>
+                <div id="wl-status-label" class="status-text">NAČÍTÁNÍ...</div>
+                <p id="wl-info" style="color: #888; font-size: 0.7rem; margin-top: 5px;"></p>
+            </div>
+
+            <div id="btn-admin" class="card admin" style="display: none;">
+                <div style="font-size: 50px; margin-bottom: 10px;">👔</div>
+                <h3>WL ADDER</h3>
+                <p style="color: #888; font-size: 0.8rem;">Správa systému</p>
             </div>
         </div>
+        
         <div class="logout-link" onclick="logout()">Odhlásit se</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs",
@@ -148,53 +156,86 @@
             const savedUser = localStorage.getItem('discord_user');
 
             if (savedUser) {
-                renderUser(JSON.parse(savedUser));
+                const user = JSON.parse(savedUser);
+                setupRealtimeUpdates(user.discordId);
+                renderUserUI(user);
             } 
             else if (code) {
-                document.body.classList.add('logged-in'); 
+                document.body.classList.add('logged-in');
                 try {
                     const response = await fetch(`/api/auth?code=${code}`);
                     const data = await response.json();
-
                     if (data.id) {
                         const user = {
-                            discordId: data.id, // Ukládáme ID
+                            discordId: data.id,
                             username: data.username,
                             avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
                         };
                         localStorage.setItem('discord_user', JSON.stringify(user));
-                        renderUser(user);
+                        setupRealtimeUpdates(user.discordId);
+                        renderUserUI(user);
                     }
-                } catch (err) { console.error("Chyba při přihlášení:", err); }
+                } catch (err) { console.error(err); }
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         };
 
-        async function renderUser(user) {
+        function setupRealtimeUpdates(userId) {
+            // Sledujeme změny v databázi v reálném čase
+            onSnapshot(doc(db, "users", userId), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    updateStatusCard(data);
+                    
+                    // Zobrazit admin kartu jen pokud je admin
+                    if (data.role === "admin") {
+                        document.getElementById('btn-admin').style.display = "block";
+                    }
+                } else {
+                    // Pokud uživatel v DB ještě není, vytvoříme ho
+                    const user = JSON.parse(localStorage.getItem('discord_user'));
+                    setDoc(doc(db, "users", userId), {
+                        discordId: userId,
+                        username: user.username,
+                        avatar: user.avatar,
+                        wlStatus: "none",
+                        attemptsLeft: 3,
+                        role: "user"
+                    });
+                }
+            });
+        }
+
+        function updateStatusCard(data) {
+            const label = document.getElementById('wl-status-label');
+            const info = document.getElementById('wl-info');
+            
+            if (data.wlStatus === "none") {
+                label.innerText = "NEZAŽÁDÁNO";
+                label.className = "status-text";
+                info.innerText = `Zbývající pokusy: ${data.attemptsLeft}/3`;
+            } else if (data.wlStatus === "pending") {
+                label.innerText = "ČEKÁ NA SCHVÁLENÍ";
+                label.className = "status-text status-pending";
+                info.innerText = "Adder brzy posoudí tvou žádost.";
+            } else if (data.wlStatus === "approved") {
+                label.innerText = "SCHVÁLENO (ANO)";
+                label.className = "status-text status-approved";
+                info.innerText = `Schválil: ${data.assignedAdder || 'Admin'}`;
+            } else if (data.wlStatus === "rejected") {
+                label.innerText = "ZAMÍTNUTO (NE)";
+                label.className = "status-text status-rejected";
+                info.innerText = `Pokusy: ${data.attemptsLeft}/3. Důvod: ${data.rejectReason || 'Neuveden'}`;
+            }
+        }
+
+        function renderUserUI(user) {
             document.body.classList.add('logged-in');
             document.getElementById('user-profile').style.display = 'flex';
             document.getElementById('user-name').innerText = user.username;
             document.getElementById('user-avatar').src = user.avatar;
-            document.getElementById('user-id-display').innerText = `Discord ID: ${user.discordId}`;
-
-            // ZÁPIS DO FIRESTORE (Podle Discord ID)
-            try {
-                await setDoc(doc(db, "users", user.discordId), {
-                    discordId: user.discordId,
-                    username: user.username,
-                    avatar: user.avatar,
-                    lastLogin: new Date().toISOString(),
-                    role: "user" // Defaultní role, v databázi si pak můžeš přepsat na "admin"
-                }, { merge: true });
-                console.log("Uživatel s ID " + user.discordId + " uložen.");
-            } catch (e) { console.error("Firestore error:", e); }
+            document.getElementById('user-id-display').innerText = `ID: ${user.discordId}`;
         }
-
-        // AKCE PRO KARTY
-        document.getElementById('btn-apply').onclick = function() {
-            // Tady budeme otevírat formulář
-            alert('Připravuji formulář pro ' + JSON.parse(localStorage.getItem('discord_user')).username);
-        };
 
         window.logout = function() {
             localStorage.removeItem('discord_user');
