@@ -10,6 +10,7 @@
             --primary-neon: #00f2ff;
             --secondary-neon: #00ff88;
             --discord-color: #5865F2;
+            --error-red: #ff4b4b;
         }
 
         body, html {
@@ -43,9 +44,10 @@
             background-color: var(--discord-color); color: white;
             text-decoration: none; padding: 18px 40px; border-radius: 15px;
             font-weight: 700; transition: 0.3s; margin-top: 25px;
+            cursor: pointer;
         }
 
-        /* GATEWAY */
+        /* GATEWAY (PANEL) */
         #gateway {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; perspective: 1500px;
@@ -106,6 +108,7 @@
             <img id="user-avatar" src="" alt="Avatar">
             <h2 style="margin: 0; font-weight: 500; letter-spacing: 2px;">VÍTEJTE ZPĚT,</h2>
             <h1 id="user-name" style="margin: 0; color: var(--primary-neon); font-size: 3rem; letter-spacing: 4px; text-transform: uppercase;">HRÁČI</h1>
+            <p id="user-id-display" style="color: rgba(255,255,255,0.2); font-size: 0.8rem; margin-top: 5px;"></p>
         </div>
 
         <div class="card-container">
@@ -148,21 +151,21 @@
                 renderUser(JSON.parse(savedUser));
             } 
             else if (code) {
-                document.body.classList.add('logged-in');
+                document.body.classList.add('logged-in'); 
                 try {
                     const response = await fetch(`/api/auth?code=${code}`);
                     const data = await response.json();
 
                     if (data.id) {
                         const user = {
-                            id: data.id,
+                            discordId: data.id, // Ukládáme ID
                             username: data.username,
                             avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
                         };
                         localStorage.setItem('discord_user', JSON.stringify(user));
                         renderUser(user);
                     }
-                } catch (err) { console.error("Chyba:", err); }
+                } catch (err) { console.error("Chyba při přihlášení:", err); }
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         };
@@ -172,17 +175,26 @@
             document.getElementById('user-profile').style.display = 'flex';
             document.getElementById('user-name').innerText = user.username;
             document.getElementById('user-avatar').src = user.avatar;
+            document.getElementById('user-id-display').innerText = `Discord ID: ${user.discordId}`;
 
-            // ZÁPIS DO FIRESTORE
+            // ZÁPIS DO FIRESTORE (Podle Discord ID)
             try {
-                await setDoc(doc(db, "users", user.id), {
+                await setDoc(doc(db, "users", user.discordId), {
+                    discordId: user.discordId,
                     username: user.username,
                     avatar: user.avatar,
-                    lastLogin: new Date().toISOString()
+                    lastLogin: new Date().toISOString(),
+                    role: "user" // Defaultní role, v databázi si pak můžeš přepsat na "admin"
                 }, { merge: true });
-                console.log("Uživatel uložen do databáze.");
+                console.log("Uživatel s ID " + user.discordId + " uložen.");
             } catch (e) { console.error("Firestore error:", e); }
         }
+
+        // AKCE PRO KARTY
+        document.getElementById('btn-apply').onclick = function() {
+            // Tady budeme otevírat formulář
+            alert('Připravuji formulář pro ' + JSON.parse(localStorage.getItem('discord_user')).username);
+        };
 
         window.logout = function() {
             localStorage.removeItem('discord_user');
