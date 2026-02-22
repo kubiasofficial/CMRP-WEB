@@ -14,60 +14,55 @@
         body, html {
             margin: 0; padding: 0; min-height: 100vh;
             font-family: 'Rajdhani', sans-serif;
-            background-color: #000; color: white;
+            background: #000; color: white;
             display: flex; justify-content: center; align-items: center;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            /* Decentně zviditelněno - upravený průhledný gradient */
-            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7)), url('./prihlaskapozadi.jpg');
+            /* Průhlednost nastavena pro decentní viditelnost */
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('prihlaskapozadi.jpg');
             background-size: cover; background-position: center; z-index: -1;
         }
 
         .container {
-            width: 90%; max-width: 800px; padding: 40px;
-            background: rgba(10, 10, 10, 0.5); 
+            width: 90%; max-width: 500px; padding: 40px;
+            background: rgba(10, 10, 10, 0.6); 
             backdrop-filter: blur(15px);
             border: 2px solid var(--primary-neon);
             border-radius: 30px; 
-            box-shadow: 0 0 40px rgba(188, 19, 254, 0.2);
-            /* Animace příletu formuláře */
+            box-shadow: 0 0 40px rgba(188, 19, 254, 0.25);
+            /* Animace příletu */
             transform: translateY(100vh);
             animation: slideIn 0.8s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes slideIn {
-            to { transform: translateY(0); }
-        }
+        @keyframes slideIn { to { transform: translateY(0); } }
 
-        h1 { color: var(--primary-neon); text-transform: uppercase; margin-top: 0; }
-        label { display: block; color: var(--secondary-neon); margin-bottom: 8px; font-weight: 700; }
+        h1 { color: var(--primary-neon); text-transform: uppercase; text-align: center; }
+        label { display: block; color: var(--secondary-neon); margin-bottom: 5px; font-weight: 700; font-size: 0.8rem; }
         
-        input, textarea {
+        input {
             width: 100%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px; border-radius: 10px; color: white; font-family: 'Rajdhani'; margin-bottom: 20px;
-            box-sizing: border-box;
+            padding: 12px; border-radius: 10px; color: white; margin-bottom: 20px; box-sizing: border-box;
         }
 
         .btn-submit {
             background: var(--primary-neon); color: white; border: none; width: 100%;
-            padding: 18px; border-radius: 12px; font-weight: 700; cursor: pointer;
-            transition: 0.3s;
+            padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s;
         }
-        .btn-submit:hover { box-shadow: 0 0 20px var(--primary-neon); transform: scale(1.02); }
     </style>
-</head>
+ head>
 <body>
     <div class="background"></div>
     <div class="container">
         <h1>NÁBOROVÝ FORMULÁŘ</h1>
-        <form id="applyForm">
+        <form>
             <label>STEAM HEX ID</label>
-            <input type="text" id="q_hex" required>
+            <input type="text" placeholder="1100001...">
             <label>JMÉNO POSTAVY (IC)</label>
-            <input type="text" id="q_name" required>
+            <input type="text" placeholder="John Doe">
             <button type="submit" class="btn-submit">ODESLAT</button>
         </form>
     </div>
