@@ -7,27 +7,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #bc13fe; --secondary: #00f2ff; --error: #ff2222; --success: #22ff22; }
-        body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; color: white; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover; display: flex; align-items: center; justify-content: center; }
+        body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; color: white; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://i.imgur.com/your-background-image.jpg') no-repeat center center fixed; background-size: cover; display: flex; align-items: center; justify-content: center; }
         
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; display: flex; align-items: center; justify-content: center; }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .logged-in #login-overlay { display: none; }
 
         .card-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-        .card { background: rgba(10,10,10,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px; width: 220px; text-align: center; transition: 0.3s; cursor: pointer; position: relative; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .card { background: rgba(10,10,10,0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px; width: 220px; text-align: center; transition: 0.3s; cursor: pointer; }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 0 20px rgba(188, 19, 254, 0.2); }
         .status-card { border-bottom: 4px solid #ffcc00; cursor: default; }
 
-        #user-avatar { width: 100px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 15px; }
-        .reason-box { background: rgba(255, 34, 34, 0.1); border: 1px solid var(--error); border-radius: 10px; padding: 10px; margin-top: 15px; font-size: 0.9rem; color: #ffbaba; }
+        #user-avatar { width: 100px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px var(--primary); }
+        .reason-box { background: rgba(255, 34, 34, 0.1); border: 1px solid var(--error); border-radius: 10px; padding: 10px; margin-top: 15px; font-size: 0.9rem; color: #ffbaba; text-align: left; }
         
-        .logout-btn { margin-top: 30px; background: none; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-family: 'Rajdhani'; opacity: 0.6; }
-        .logout-btn:hover { opacity: 1; background: var(--error); border-color: var(--error); }
+        .logout-btn { margin-top: 40px; background: none; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: 'Rajdhani'; transition: 0.3s; }
+        .logout-btn:hover { background: var(--error); border-color: var(--error); opacity: 1; }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
-        <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" style="background:#5865F2; color:white; padding:15px 30px; text-decoration:none; border-radius:10px; font-weight:bold;">PŘIHLÁSIT PŘES DISCORD</a>
+        <div id="login-content" style="text-align: center;">
+            <h1 style="color: var(--primary); font-size: 3rem; margin-bottom: 10px;">CMRP</h1>
+            <p style="margin-bottom: 30px; opacity: 0.7;">Vítejte v náborovém systému</p>
+            <a id="login-link" href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" 
+               style="background:#5865F2; color:white; padding:15px 40px; text-decoration:none; border-radius:10px; font-weight:bold; text-transform: uppercase; letter-spacing: 1px;">
+               Přihlásit přes Discord
+            </a>
+        </div>
+        <div id="loading-spinner" style="display: none; flex-direction: column; align-items: center;">
+            <div class="loader"></div>
+            <p>Ověřování identity...</p>
+        </div>
     </div>
 
     <div id="main-ui" style="display:none; text-align:center;">
@@ -36,21 +50,21 @@
 
         <div class="card-container">
             <div class="card" id="btn-prihlaska">
-                <span style="font-size: 2rem;">📄</span>
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">📄</div>
                 <h3>PŘIHLÁŠKA</h3>
                 <p style="font-size: 0.8rem; opacity: 0.6;">Odeslat novou žádost</p>
             </div>
 
             <div class="card status-card" id="status-card">
-                <span style="font-size: 2rem;">🛡️</span>
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">🛡️</div>
                 <h3>STAV WL</h3>
-                <div id="status-text" style="font-weight:bold; color:#ffcc00; font-size: 1.2rem;">NAČÍTÁNÍ...</div>
+                <div id="status-text" style="font-weight:bold; color:#ffcc00; font-size: 1.2rem; text-transform: uppercase;">NAČÍTÁNÍ...</div>
                 <div id="attempts-text" style="font-size:0.9rem; opacity:0.8; margin-top: 5px;">Pokusy: -/-</div>
                 <div id="reason-area"></div>
             </div>
 
             <div id="btn-admin" class="card" style="display:none; border-bottom:4px solid var(--primary)" onclick="location.href='admin.html'">
-                <span style="font-size: 2rem;">👔</span>
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">👔</div>
                 <h3>WL ADDER</h3>
                 <p style="font-size: 0.8rem; opacity: 0.6;">Administrace</p>
             </div>
@@ -67,8 +81,36 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.logout = () => { localStorage.clear(); window.location.reload(); };
+        window.logout = () => { localStorage.clear(); window.location.href = window.location.origin; };
 
+        // 1. ZPRACOVÁNÍ NÁVRATU Z DISCORDU
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+
+        if (code) {
+            document.getElementById('login-content').style.display = 'none';
+            document.getElementById('loading-spinner').style.display = 'flex';
+
+            fetch(`/api/auth?code=${code}`)
+                .then(res => res.json())
+                .then(data => {
+                    const userData = {
+                        discordId: data.id,
+                        username: data.username,
+                        avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
+                    };
+                    localStorage.setItem('discord_user', JSON.stringify(userData));
+                    // Vyčištění URL a reload
+                    window.location.href = window.location.origin;
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Chyba při přihlašování. Zkuste to znovu.");
+                    window.location.href = window.location.origin;
+                });
+        }
+
+        // 2. LOGIKA PRO PŘIHLÁŠENÉHO UŽIVATELE
         const savedUser = localStorage.getItem('discord_user');
         if (savedUser) {
             const user = JSON.parse(savedUser);
@@ -77,37 +119,35 @@
             document.getElementById('user-name').innerText = user.username;
             document.getElementById('user-avatar').src = user.avatar;
 
+            // Real-time sledování dat uživatele ve Firebase
             onSnapshot(doc(db, "users", user.discordId), async (ds) => {
                 if (ds.exists()) {
                     const data = ds.data();
                     const status = data.wlStatus || "none";
                     const attempts = data.attempts ?? 3;
                     
-                    // 1. Aktualizace textů
-                    document.getElementById('status-text').innerText = status.toUpperCase();
+                    document.getElementById('status-text').innerText = status;
                     document.getElementById('attempts-text').innerText = `Zbývající pokusy: ${attempts}/3`;
                     
-                    // 2. Barva karty podle stavu
                     const sCard = document.getElementById('status-card');
                     if(status === "schváleno") { sCard.style.borderColor = "var(--success)"; document.getElementById('status-text').style.color = "var(--success)"; }
                     else if(status === "zamítnuto") { sCard.style.borderColor = "var(--error)"; document.getElementById('status-text').style.color = "var(--error)"; }
                     else { sCard.style.borderColor = "#ffcc00"; document.getElementById('status-text').style.color = "#ffcc00"; }
 
-                    // 3. ADMIN TLAČÍTKO (Kontrola role, ne statusu!)
+                    // Tlačítko WL ADDER (vždy viditelné pro Adminy)
                     if(data.role === "admin") {
                         document.getElementById('btn-admin').style.display = "block";
                     }
 
-                    // 4. LOGIKA PŘIHLÁŠKY (Pustit jen když může)
-                    const pBtn = document.getElementById('btn-prihlaska');
-                    pBtn.onclick = () => {
-                        if(status === "v řešení") return alert("Tvoje žádost se už zpracovává.");
-                        if(status === "schváleno") return alert("Už jsi schválen na WL!");
-                        if(attempts <= 0) return alert("Už nemáš žádné pokusy.");
+                    // Logika tlačítka PŘIHLÁŠKA
+                    document.getElementById('btn-prihlaska').onclick = () => {
+                        if(status === "v řešení") return alert("Tvoje žádost se právě posuzuje.");
+                        if(status === "schváleno") return alert("Už jsi členem WhiteListu!");
+                        if(attempts <= 0) return alert("Už nemáš žádné další pokusy.");
                         location.href = 'prihlaska.html';
                     };
 
-                    // 5. ZOBRAZENÍ DŮVODU
+                    // Zobrazení důvodu zamítnutí
                     if(status === "zamítnuto") {
                         const hQuery = query(collection(db, "history"), where("playerID", "==", user.discordId), orderBy("date", "desc"), limit(1));
                         const hSnap = await getDocs(hQuery);
@@ -115,7 +155,7 @@
                             const hData = hSnap.docs[0].data();
                             document.getElementById('reason-area').innerHTML = `
                                 <div class="reason-box">
-                                    <strong>DŮVOD:</strong><br>${hData.reason || "Neuveden"}
+                                    <strong style="color:white">DŮVOD ZAMÍTNUTÍ:</strong><br>${hData.reason || "Neuveden"}
                                 </div>`;
                         }
                     } else { document.getElementById('reason-area').innerHTML = ""; }
