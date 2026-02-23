@@ -6,89 +6,78 @@
     <title>Community Roleplay | Systém</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-neon: #bc13fe; 
-            --secondary-neon: #00f2ff; 
-            --warning-yellow: #ffcc00;
-        }
+        :root { --primary-neon: #bc13fe; --secondary-neon: #00f2ff; --warning-yellow: #ffcc00; }
 
-        /* OPRAVA POZADÍ - teď je přímo na body a nikam nezmizí */
         body, html {
             margin: 0; padding: 0; min-height: 100vh;
-            font-family: 'Rajdhani', sans-serif;
-            color: white; 
-            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('pozadicko.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            overflow-x: hidden;
+            font-family: 'Rajdhani', sans-serif; color: white;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('pozadicko.jpg') no-repeat center center fixed;
+            background-size: cover; overflow-x: hidden;
         }
 
+        /* Login Overlay */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(15px);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
         }
-
-        /* Schováme overlay, když je uživatel přihlášen */
         .logged-in #login-overlay { display: none; }
 
-        .login-box {
-            background: rgba(188, 19, 254, 0.05); border: 2px solid var(--primary-neon);
-            padding: 50px; border-radius: 40px; text-align: center;
-            box-shadow: 0 0 50px rgba(188, 19, 254, 0.2);
-        }
-
-        #gateway {
-            display: none; flex-direction: column; align-items: center;
-            justify-content: center; min-height: 100vh;
-        }
+        /* Dashboard */
+        #gateway { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
         .logged-in #gateway { display: flex; }
 
         .card-container { display: flex; gap: 30px; margin-top: 20px; }
         .card {
-            background: rgba(15, 15, 15, 0.75); backdrop-filter: blur(15px);
+            background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px;
-            padding: 40px 20px; width: 220px; text-align: center; transition: 0.4s;
+            padding: 40px 20px; width: 230px; text-align: center; transition: 0.4s;
         }
-        .card.status { border-bottom: 5px solid var(--warning-yellow); }
-        #wl-label { color: var(--warning-yellow); font-weight: 700; margin-top: 10px; }
-        .attempts-sub { font-size: 0.75rem; opacity: 0.6; display: block; margin-top: 5px; }
+        .card:hover { transform: translateY(-10px); border-color: var(--primary-neon); }
+        .card.status { border-bottom: 5px solid var(--warning-yellow); cursor: default; }
+        
+        #wl-label { color: var(--warning-yellow); font-weight: 700; margin-top: 10px; font-size: 1.2rem; }
+        .attempts-sub { font-size: 0.8rem; opacity: 0.6; display: block; }
 
-        .discord-btn {
-            display: inline-block; background: #5865F2; color: white;
-            padding: 15px 30px; border-radius: 12px; text-decoration: none;
-            font-weight: bold; margin-top: 20px; transition: 0.3s;
+        /* Admin Panel Overlay */
+        #admin-panel {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 10000; padding: 50px; overflow-y: auto; box-sizing: border-box;
         }
-        .discord-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px #5865F2; }
+
+        .zadost-box {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--secondary-neon);
+            padding: 20px; border-radius: 15px; margin-bottom: 20px;
+        }
+
+        .btn-action { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; margin-right: 10px; }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
-        <div class="login-box" id="login-content">
-            <img src="cmrp.png" alt="Logo" style="width: 200px; margin-bottom: 15px;">
-            <h2 style="letter-spacing: 5px; color: var(--primary-neon);">SYSTÉM</h2>
-            <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" class="discord-btn">
-                PŘIHLÁSIT PŘES DISCORD
+        <div style="text-align: center;">
+            <img src="cmrp.png" style="width: 220px; margin-bottom: 20px;">
+            <h2 style="color: var(--primary-neon); letter-spacing: 5px;">SYSTÉM VSTUPU</h2>
+            <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" 
+               style="background:#5865F2; color:white; padding:15px 35px; border-radius:12px; text-decoration:none; font-weight:bold; display:inline-block; margin-top:20px;">
+               PŘIHLÁSIT PŘES DISCORD
             </a>
         </div>
     </div>
 
     <div id="gateway">
-        <div id="user-profile" style="text-align: center; margin-bottom: 30px;">
-            <img id="user-avatar" src="" style="width: 120px; border-radius: 50%; border: 3px solid var(--primary-neon);">
-            <h1 id="user-name" style="color:var(--primary-neon); font-size:3.5rem; text-transform:uppercase; margin: 10px 0;">HRÁČ</h1>
-        </div>
-
+        <img id="user-avatar" src="" style="width: 120px; border-radius: 50%; border: 4px solid var(--primary-neon); box-shadow: 0 0 30px rgba(188,19,254,0.3);">
+        <h1 id="user-name" style="font-size: 3.5rem; margin: 15px 0; text-transform: uppercase; color: var(--primary-neon);">HRÁČ</h1>
+        
         <div class="card-container">
             <div onclick="location.href='prihlaska.html'" class="card" style="border-bottom: 5px solid var(--secondary-neon); cursor:pointer;">
-                <div style="font-size: 45px;">📄</div>
+                <div style="font-size:45px;">📄</div>
                 <h3>PŘIHLÁŠKA</h3>
             </div>
             
             <div class="card status">
-                <div style="font-size: 45px;">🛡️</div>
+                <div style="font-size:45px;">🛡️</div>
                 <h3>STAV WL</h3>
                 <div id="wl-label">
                     <span id="status-text">NAČÍTÁNÍ...</span>
@@ -96,17 +85,23 @@
                 </div>
             </div>
 
-            <div id="btn-admin" class="card" style="border-bottom: 5px solid var(--primary-neon); display: none; cursor:pointer;">
-                <div style="font-size: 45px;">👔</div>
+            <div id="btn-admin" class="card" style="border-bottom: 5px solid var(--primary-neon); display:none; cursor:pointer;">
+                <div style="font-size:45px;">👔</div>
                 <h3>WL ADDER</h3>
             </div>
         </div>
-        <div onclick="logout()" style="margin-top: 40px; color: rgba(255,255,255,0.3); cursor: pointer;">ODHLÁSIT SE</div>
+        <div onclick="logout()" style="margin-top:40px; opacity:0.4; cursor:pointer;">ODHLÁSIT SE</div>
+    </div>
+
+    <div id="admin-panel">
+        <button onclick="document.getElementById('admin-panel').style.display='none'" style="float:right; background:red; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">ZAVŘÍT</button>
+        <h1 style="color:var(--primary-neon)">SPRÁVA ŽÁDOSTÍ</h1>
+        <div id="admin-list"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, collection, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs",
@@ -123,32 +118,20 @@
             const code = urlParams.get('code');
             const savedUser = localStorage.getItem('discord_user');
 
-            // 1. Zpracování návratu z Discordu (Kód v URL)
             if (code) {
-                document.getElementById('login-content').innerHTML = `
-                    <h2 style="color:var(--secondary-neon)">OVĚŘOVÁNÍ...</h2>
-                    <p>Momentík, přihlašujeme tě do systému.</p>
-                `;
                 try {
                     const res = await fetch(`/api/auth?code=${code}`);
                     const data = await res.json();
                     if (data.id) {
                         localStorage.setItem('discord_user', JSON.stringify({
-                            discordId: data.id, 
-                            username: data.username, 
-                            avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
+                            discordId: data.id, username: data.username, avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
                         }));
-                        // Přesměrování na čistou URL bez kódu, aby se proces neopakoval
                         window.location.replace(window.location.origin);
                     }
-                } catch (e) {
-                    alert("Chyba při přihlašování. Zkus to znovu.");
-                    window.location.replace(window.location.origin);
-                }
+                } catch (e) { window.location.replace(window.location.origin); }
                 return;
             }
 
-            // 2. Pokud je uživatel přihlášen, ukaž dashboard
             if (savedUser) {
                 const user = JSON.parse(savedUser);
                 document.body.classList.add('logged-in');
@@ -162,17 +145,42 @@
                         document.getElementById('attempts-text').innerText = `Zbývající pokusy: ${data.attempts ?? 3}/3`;
                         if (data.role === "admin") document.getElementById('btn-admin').style.display = "block";
                     } else {
-                        // Vytvoření nového uživatele v DB
-                        setDoc(doc(db, "users", user.discordId), { 
-                            username: user.username, 
-                            wlStatus: "none", 
-                            attempts: 3, 
-                            role: "user" 
-                        });
+                        setDoc(doc(db, "users", user.discordId), { username: user.username, wlStatus: "none", attempts: 3, role: "user" });
                     }
                 });
             }
         }
+
+        // Admin Logika
+        document.getElementById('btn-admin').onclick = async () => {
+            document.getElementById('admin-panel').style.display = 'block';
+            const list = document.getElementById('admin-list');
+            list.innerHTML = "Načítám...";
+            
+            const snap = await getDocs(collection(db, "zadosti"));
+            list.innerHTML = "";
+            snap.forEach(docSnap => {
+                const d = docSnap.data();
+                const div = document.createElement('div');
+                div.className = "zadost-box";
+                div.innerHTML = `
+                    <h3>Hráč: ${d.discordTag}</h3>
+                    <p><strong>Steam:</strong> ${d.steamHex}</p>
+                    <p><strong>Lore:</strong> ${d.lore}</p>
+                    <hr>
+                    <button class="btn-action" style="background:green; color:white;" onclick="handleWL('${d.discordId}', '${docSnap.id}', 'schváleno')">SCHVÁLIT</button>
+                    <button class="btn-action" style="background:red; color:white;" onclick="handleWL('${d.discordId}', '${docSnap.id}', 'zamítnuto')">ZAMÍTNOUT</button>
+                `;
+                list.appendChild(div);
+            });
+        };
+
+        window.handleWL = async (uid, docId, newStatus) => {
+            await updateDoc(doc(db, "users", uid), { wlStatus: newStatus });
+            await deleteDoc(doc(db, "zadosti", docId));
+            alert("Status aktualizován!");
+            location.reload();
+        };
 
         window.logout = () => { localStorage.clear(); window.location.replace(window.location.origin); };
         init();

@@ -3,114 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMRP | Náborový Panel</title>
+    <title>CMRP | Nábor</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary-neon: #bc13fe; --secondary-neon: #00f2ff; }
+        body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; background: #000; color: white; }
         
-        body, html {
-            margin: 0; padding: 0; min-height: 100vh;
-            font-family: 'Rajdhani', sans-serif; background: #000; color: white;
-        }
-
+        /* Celoplošné pozadí bez pruhů */
         .page-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('pozadicko.jpg');
-            background-size: cover; background-position: center; z-index: -1;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('prihlaskapozadi.jpg') no-repeat center center fixed;
+            background-size: cover; z-index: -1;
         }
 
-        .main-wrapper {
-            display: flex; justify-content: center; align-items: center;
-            padding: 50px 20px; min-height: 100vh; box-sizing: border-box;
-        }
-
-        .form-container {
-            width: 100%; max-width: 800px;
-            background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(20px);
-            border: 2px solid var(--primary-neon); border-radius: 30px;
-            padding: 40px; position: relative; box-shadow: 0 0 50px rgba(188, 19, 254, 0.15);
-        }
-
-        h1 { color: var(--primary-neon); text-align: center; text-transform: uppercase; margin-top: 0; letter-spacing: 3px; }
+        .main-wrapper { display: flex; justify-content: center; align-items: center; padding: 50px 20px; min-height: 100vh; box-sizing: border-box; }
+        .form-container { width: 100%; max-width: 750px; background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(20px); border: 2px solid var(--primary-neon); border-radius: 30px; padding: 40px; position: relative; }
         
-        label { color: var(--secondary-neon); font-weight: 700; display: block; margin-bottom: 8px; font-size: 0.95rem; text-transform: uppercase; }
-        
-        input, textarea {
-            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px; border-radius: 12px; color: white; font-family: 'Rajdhani';
-            box-sizing: border-box; margin-bottom: 25px; font-size: 1rem; transition: 0.3s;
-        }
+        h1 { color: var(--primary-neon); text-align: center; text-transform: uppercase; margin-top: 0; }
+        label { color: var(--secondary-neon); font-weight: 700; display: block; margin-bottom: 8px; margin-top: 20px; }
+        input, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; }
+        textarea { height: 100px; resize: vertical; }
 
-        input:focus, textarea:focus { border-color: var(--secondary-neon); outline: none; background: rgba(255,255,255,0.07); }
-
-        textarea { height: 120px; resize: vertical; }
-
-        .btn-submit {
-            background: var(--primary-neon); color: white; border: none; width: 100%;
-            padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; transition: 0.3s;
-            text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem;
-        }
-        .btn-submit:hover { background: #9d0ed5; box-shadow: 0 0 25px var(--primary-neon); transform: translateY(-2px); }
-
-        .back-link { position: absolute; top: 25px; left: 25px; color: white; text-decoration: none; opacity: 0.5; font-size: 0.9rem; transition: 0.3s; }
-        .back-link:hover { opacity: 1; color: var(--secondary-neon); }
-
-        /* Styl pro zprávu po odeslání */
-        #success-msg { display: none; text-align: center; padding: 20px; }
-        #success-msg h2 { color: var(--secondary-neon); }
-        #success-msg p { line-height: 1.6; font-size: 1.2rem; }
+        .btn-submit { background: var(--primary-neon); color: white; border: none; width: 100%; padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; margin-top: 30px; text-transform: uppercase; }
+        .back-link { position: absolute; top: 20px; left: 20px; color: white; text-decoration: none; opacity: 0.6; }
     </style>
 </head>
 <body>
     <div class="page-bg"></div>
     <div class="main-wrapper">
-        <div class="form-container">
-            <a href="index.html" class="back-link">← ZPĚT DO SYSTÉMU</a>
-            
-            <div id="form-content">
-                <h1>NÁBOROVÝ FORMULÁŘ</h1>
-                <form id="applyForm">
-                    <label>1. STEAM HEX ID</label>
-                    <input type="text" id="steam_hex" placeholder="např. 1100001..." required>
+        <div class="form-container" id="form-box">
+            <a href="index.html" class="back-link">← ZPĚT</a>
+            <h1>NÁBOROVÝ FORMULÁŘ</h1>
+            <form id="applyForm">
+                <label>1. STEAM HEX ID</label>
+                <input type="text" id="hex" placeholder="1100001..." required>
 
-                    <label>2. LORE POSTAVY (PŘÍBĚH)</label>
-                    <textarea id="lore" placeholder="Popište minulost, motivaci a charakter vaší postavy..." required></textarea>
+                <label>2. LORE POSTAVY</label>
+                <textarea id="lore" placeholder="Příběh vaší postavy..." required></textarea>
 
-                    <label>3. CO JE TO FEAR RP? (VYSVĚTLI A UVEĎ PŘÍKLAD)</label>
-                    <textarea id="fear_rp" placeholder="Jak se postava chová, když je v ohrožení života?" required></textarea>
+                <label>3. CO JE TO FEAR RP? (VYSVĚTLI A UVEĎ PŘÍKLAD)</label>
+                <textarea id="fear" required></textarea>
 
-                    <label>4. CO JE TO METAGAMING? (VYSVĚTLI A UVEĎ PŘÍKLAD)</label>
-                    <textarea id="metagaming" placeholder="Použití informací z reálného světa v RP..." required></textarea>
+                <label>4. CO JE TO METAGAMING? (VYSVĚTLI A UVEĎ PŘÍKLAD)</label>
+                <textarea id="meta" required></textarea>
 
-                    <label>5. PO TRANSPORTU SCRIPTEM (MÍSTNÍ EMS), JAK SE MUSÍŠ ZACHOVAT?</label>
-                    <textarea id="ems_behavior" placeholder="Popiš postup po probuzení v nemocnici..." required></textarea>
+                <label>5. PO TRANSPORTU SCRIPTEM (MÍSTNÍ EMS) JAK SE MUSÍŠ ZACHOVAT?</label>
+                <textarea id="ems" required></textarea>
 
-                    <label>6. JAKÝM STYLEM VYPLŇUJEME V NEMOCNICI KARTOTÉKU?</label>
-                    <textarea id="hospital_file" placeholder="Jaké příkazy/styl komunikace používáš?" required></textarea>
+                <label>6. JAKÝM STYLEM VYPLŇUJEME V NEMOCNICI KARTOTÉKU?</label>
+                <textarea id="kartoteka" required></textarea>
 
-                    <button type="submit" class="btn-submit">ODESLAT ŽÁDOST</button>
-                </form>
-            </div>
+                <button type="submit" class="btn-submit">ODESLAT ŽÁDOST</button>
+            </form>
+        </div>
 
-            <div id="success-msg">
-                <h2>ŽÁDOST BYLA ODESLÁNA!</h2>
-                <br>
-                <p>Děkujeme za vyplnění žádosti. Brzy se dozvíš svůj výsledek, sleduj náš web, abys se dozvěděl svůj výsledek co nejdříve.</p>
-                <br>
-                <p><strong>S pozdravem CMRP Tým</strong></p>
-                <br>
-                <button onclick="location.href='index.html'" class="btn-submit" style="max-width: 200px;">ZPĚT</button>
-            </div>
+        <div class="form-container" id="success-msg" style="display:none; text-align:center;">
+            <h2 style="color:var(--secondary-neon)">ŽÁDOST ODESLÁNA!</h2>
+            <p>Děkujeme za vyplnění žádosti. Brzy se dozvíš svůj výsledek, sleduj náš web aby ses dozvěděl výsledek co nejdříve.</p>
+            <p><strong>S pozdravem CMRP Tým</strong></p>
+            <button onclick="location.href='index.html'" class="btn-submit">ZPĚT NA HLAVNÍ STRÁNKU</button>
         </div>
     </div>
 
-    <script>
-        document.getElementById('applyForm').onsubmit = function(e) {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs",
+            authDomain: "cmrp-system.firebaseapp.com",
+            projectId: "cmrp-system",
+            storageBucket: "cmrp-system.firebasestorage.app",
+            appId: "1:264321137651:web:295e93bd12e7f8b80fb086"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('applyForm').onsubmit = async (e) => {
             e.preventDefault();
+            const user = JSON.parse(localStorage.getItem('discord_user'));
             
-            // Tady se později přidá kód pro odeslání do Firebase nebo na Discord Webhook
-            
-            document.getElementById('form-content').style.display = 'none';
+            await addDoc(collection(db, "zadosti"), {
+                discordId: user.discordId,
+                discordTag: user.username,
+                steamHex: document.getElementById('hex').value,
+                lore: document.getElementById('lore').value,
+                status: "čeká"
+            });
+
+            document.getElementById('form-box').style.display = 'none';
             document.getElementById('success-msg').style.display = 'block';
         };
     </script>
