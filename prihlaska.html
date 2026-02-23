@@ -9,7 +9,6 @@
         :root { --primary-neon: #bc13fe; --secondary-neon: #00f2ff; }
         body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; background: #000; color: white; }
         
-        /* Celoplošné pozadí bez pruhů */
         .page-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('prihlaskapozadi.jpg') no-repeat center center fixed;
@@ -19,13 +18,16 @@
         .main-wrapper { display: flex; justify-content: center; align-items: center; padding: 50px 20px; min-height: 100vh; box-sizing: border-box; }
         .form-container { width: 100%; max-width: 750px; background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(20px); border: 2px solid var(--primary-neon); border-radius: 30px; padding: 40px; position: relative; }
         
-        h1 { color: var(--primary-neon); text-align: center; text-transform: uppercase; margin-top: 0; }
-        label { color: var(--secondary-neon); font-weight: 700; display: block; margin-bottom: 8px; margin-top: 20px; }
-        input, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; }
+        h1 { color: var(--primary-neon); text-align: center; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; }
+        label { color: var(--secondary-neon); font-weight: 700; display: block; margin-bottom: 8px; margin-top: 20px; font-size: 0.9rem; }
+        input, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; font-size: 1rem; }
         textarea { height: 100px; resize: vertical; }
+        input:focus, textarea:focus { outline: none; border-color: var(--secondary-neon); background: rgba(255,255,255,0.1); }
 
-        .btn-submit { background: var(--primary-neon); color: white; border: none; width: 100%; padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; margin-top: 30px; text-transform: uppercase; }
-        .back-link { position: absolute; top: 20px; left: 20px; color: white; text-decoration: none; opacity: 0.6; }
+        .btn-submit { background: var(--primary-neon); color: white; border: none; width: 100%; padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; margin-top: 30px; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        .btn-submit:hover { background: #9d00db; box-shadow: 0 0 20px rgba(188, 19, 254, 0.4); }
+        .back-link { position: absolute; top: 20px; left: 20px; color: white; text-decoration: none; opacity: 0.6; font-weight: 700; }
+        .back-link:hover { opacity: 1; color: var(--secondary-neon); }
     </style>
 </head>
 <body>
@@ -33,13 +35,13 @@
     <div class="main-wrapper">
         <div class="form-container" id="form-box">
             <a href="index.html" class="back-link">← ZPĚT</a>
-            <h1>NÁBOROVÝ FORMULÁŘ</h1>
+            <h1>NÁBOROVÝ PANEL</h1>
             <form id="applyForm">
                 <label>1. STEAM HEX ID</label>
-                <input type="text" id="hex" placeholder="1100001..." required>
+                <input type="text" id="hex" placeholder="např. 1100001..." required>
 
                 <label>2. LORE POSTAVY</label>
-                <textarea id="lore" placeholder="Příběh vaší postavy..." required></textarea>
+                <textarea id="lore" placeholder="Příběh vaší postavy, odkud pochází, cíle..." required></textarea>
 
                 <label>3. CO JE TO FEAR RP? (VYSVĚTLI A UVEĎ PŘÍKLAD)</label>
                 <textarea id="fear" required></textarea>
@@ -53,21 +55,21 @@
                 <label>6. JAKÝM STYLEM VYPLŇUJEME V NEMOCNICI KARTOTÉKU?</label>
                 <textarea id="kartoteka" required></textarea>
 
-                <button type="submit" class="btn-submit">ODESLAT ŽÁDOST</button>
+                <button type="submit" class="btn-submit">ODESLAT PŘIHLÁŠKU</button>
             </form>
         </div>
 
         <div class="form-container" id="success-msg" style="display:none; text-align:center;">
-            <h2 style="color:var(--secondary-neon)">ŽÁDOST ODESLÁNA!</h2>
-            <p>Děkujeme za vyplnění žádosti. Brzy se dozvíš svůj výsledek, sleduj náš web aby ses dozvěděl výsledek co nejdříve.</p>
-            <p><strong>S pozdravem CMRP Tým</strong></p>
-            <button onclick="location.href='index.html'" class="btn-submit">ZPĚT NA HLAVNÍ STRÁNKU</button>
+            <h2 style="color:var(--secondary-neon)">ŽÁDOST BYLA ODESLÁNA!</h2>
+            <p>Děkujeme za tvůj zájem o CMRP. Tvoje přihláška nyní čeká na posouzení WL týmem.</p>
+            <p>Výsledek uvidíš na hlavní stránce v sekci <strong>STAV WL</strong>.</p>
+            <button onclick="location.href='index.html'" class="btn-submit">NÁVRAT NA DASHBOARD</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs",
@@ -83,16 +85,53 @@
             e.preventDefault();
             const user = JSON.parse(localStorage.getItem('discord_user'));
             
-            await addDoc(collection(db, "zadosti"), {
-                discordId: user.discordId,
-                discordTag: user.username,
-                steamHex: document.getElementById('hex').value,
-                lore: document.getElementById('lore').value,
-                status: "čeká"
-            });
+            if (!user) {
+                alert("Chyba: Musíš být přihlášen přes Discord!");
+                return;
+            }
 
-            document.getElementById('form-box').style.display = 'none';
-            document.getElementById('success-msg').style.display = 'block';
+            try {
+                // 1. Zjistíme aktuální stav pokusů z profilu uživatele
+                const userRef = doc(db, "users", user.discordId);
+                const userSnap = await getDoc(userRef);
+                
+                let attemptsRemaining = 3;
+                if (userSnap.exists()) {
+                    attemptsRemaining = userSnap.data().attempts !== undefined ? userSnap.data().attempts : 3;
+                }
+
+                if (attemptsRemaining <= 0) {
+                    alert("Už jsi vyčerpal všechny 3 pokusy na Whitelist.");
+                    return;
+                }
+
+                // Výpočet čísla pokusu pro Admina (3 zbývají = 1. pokus, 2 zbývají = 2. pokus, 1 zbývá = 3. pokus)
+                const currentAttemptNumber = (3 - attemptsRemaining) + 1;
+
+                // 2. Uložení žádosti do databáze
+                await addDoc(collection(db, "zadosti"), {
+                    discordId: user.discordId,
+                    discordTag: user.username,
+                    avatar: user.avatar, 
+                    steamHex: document.getElementById('hex').value,
+                    lore: document.getElementById('lore').value,
+                    fear: document.getElementById('fear').value,
+                    meta: document.getElementById('meta').value,
+                    ems: document.getElementById('ems').value,
+                    kartoteka: document.getElementById('kartoteka').value,
+                    attemptNumber: currentAttemptNumber, 
+                    status: "čeká",
+                    createdAt: serverTimestamp()
+                });
+
+                // 3. Skrytí formuláře a zobrazení potvrzení
+                document.getElementById('form-box').style.display = 'none';
+                document.getElementById('success-msg').style.display = 'block';
+
+            } catch (err) {
+                console.error("Chyba:", err);
+                alert("Nastala chyba při odesílání: " + err.message);
+            }
         };
     </script>
 </body>
