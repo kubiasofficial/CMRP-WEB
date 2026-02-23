@@ -12,19 +12,16 @@
             --warning-yellow: #ffcc00;
         }
 
+        /* OPRAVA POZADÍ - teď je přímo na body a nikam nezmizí */
         body, html {
             margin: 0; padding: 0; min-height: 100vh;
             font-family: 'Rajdhani', sans-serif;
-            color: white; background-color: #000;
-            overflow: hidden;
-        }
-
-        /* OPRAVENÉ POZADÍ - Fixní přes celou plochu */
-        .background-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('pozadicko.jpg');
-            background-size: cover; background-position: center;
-            z-index: -10;
+            color: white; 
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('pozadicko.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            overflow-x: hidden;
         }
 
         #login-overlay {
@@ -33,70 +30,78 @@
             z-index: 9999; display: flex; align-items: center; justify-content: center;
         }
 
-        #gateway {
-            display: none; flex-direction: column; align-items: center;
-            justify-content: center; min-height: 100vh; transition: 0.8s;
+        /* Schováme overlay, když je uživatel přihlášen */
+        .logged-in #login-overlay { display: none; }
+
+        .login-box {
+            background: rgba(188, 19, 254, 0.05); border: 2px solid var(--primary-neon);
+            padding: 50px; border-radius: 40px; text-align: center;
+            box-shadow: 0 0 50px rgba(188, 19, 254, 0.2);
         }
 
-        .logged-in #login-overlay { display: none; }
+        #gateway {
+            display: none; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 100vh;
+        }
         .logged-in #gateway { display: flex; }
 
         .card-container { display: flex; gap: 30px; margin-top: 20px; }
         .card {
-            background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(10px);
+            background: rgba(15, 15, 15, 0.75); backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px;
-            padding: 40px 20px; width: 220px; text-align: center;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 40px 20px; width: 220px; text-align: center; transition: 0.4s;
         }
-        .card:hover { transform: translateY(-10px); border-color: var(--primary-neon); }
-        .card.status { border-bottom: 5px solid var(--warning-yellow); cursor: default; }
-
+        .card.status { border-bottom: 5px solid var(--warning-yellow); }
         #wl-label { color: var(--warning-yellow); font-weight: 700; margin-top: 10px; }
-        .attempts-sub { font-size: 0.75rem; opacity: 0.7; font-weight: 500; display: block; margin-top: 4px; }
+        .attempts-sub { font-size: 0.75rem; opacity: 0.6; display: block; margin-top: 5px; }
 
-        /* Animace odletu */
-        .fly-away { transform: translateY(-120vh) scale(0.5); opacity: 0; transition: 0.8s ease-in; }
+        .discord-btn {
+            display: inline-block; background: #5865F2; color: white;
+            padding: 15px 30px; border-radius: 12px; text-decoration: none;
+            font-weight: bold; margin-top: 20px; transition: 0.3s;
+        }
+        .discord-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px #5865F2; }
     </style>
 </head>
 <body>
-    <div class="background-overlay"></div>
-    
+
     <div id="login-overlay">
-        <div style="text-align: center;">
-            <img src="cmrp.png" style="width: 200px; margin-bottom: 20px;">
-            <br>
-            <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" 
-               style="background:#5865F2; color:white; padding:15px 30px; border-radius:10px; text-decoration:none; font-weight:bold;">
-               VSTOUPIT DO SYSTÉMU
+        <div class="login-box" id="login-content">
+            <img src="cmrp.png" alt="Logo" style="width: 200px; margin-bottom: 15px;">
+            <h2 style="letter-spacing: 5px; color: var(--primary-neon);">SYSTÉM</h2>
+            <a href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" class="discord-btn">
+                PŘIHLÁSIT PŘES DISCORD
             </a>
         </div>
     </div>
 
     <div id="gateway">
-        <img id="user-avatar" src="" style="width:100px; border-radius:50%; border:3px solid var(--primary-neon); margin-bottom:10px;">
-        <h1 id="user-name" style="font-size: 3rem; margin: 0; text-transform: uppercase;">HRÁČ</h1>
-        
+        <div id="user-profile" style="text-align: center; margin-bottom: 30px;">
+            <img id="user-avatar" src="" style="width: 120px; border-radius: 50%; border: 3px solid var(--primary-neon);">
+            <h1 id="user-name" style="color:var(--primary-neon); font-size:3.5rem; text-transform:uppercase; margin: 10px 0;">HRÁČ</h1>
+        </div>
+
         <div class="card-container">
-            <div id="btn-apply" class="card" style="border-bottom: 5px solid var(--secondary-neon); cursor:pointer;">
-                <div style="font-size:40px;">📄</div>
+            <div onclick="location.href='prihlaska.html'" class="card" style="border-bottom: 5px solid var(--secondary-neon); cursor:pointer;">
+                <div style="font-size: 45px;">📄</div>
                 <h3>PŘIHLÁŠKA</h3>
             </div>
             
             <div class="card status">
-                <div style="font-size:40px;">🛡️</div>
+                <div style="font-size: 45px;">🛡️</div>
                 <h3>STAV WL</h3>
                 <div id="wl-label">
                     <span id="status-text">NAČÍTÁNÍ...</span>
-                    <span id="attempts-text" class="attempts-sub">Pokusy: -/-</span>
+                    <span id="attempts-text" class="attempts-sub">Pokusy: 3/3</span>
                 </div>
             </div>
 
-            <div id="btn-admin" class="card" style="border-bottom: 5px solid var(--primary-neon); display:none;">
-                <div style="font-size:40px;">👔</div>
-                <h3>ADMIN</h3>
+            <div id="btn-admin" class="card" style="border-bottom: 5px solid var(--primary-neon); display: none; cursor:pointer;">
+                <div style="font-size: 45px;">👔</div>
+                <h3>WL ADDER</h3>
             </div>
         </div>
-        <div onclick="logout()" style="margin-top:30px; opacity:0.5; cursor:pointer;">ODHLÁSIT SE</div>
+        <div onclick="logout()" style="margin-top: 40px; color: rgba(255,255,255,0.3); cursor: pointer;">ODHLÁSIT SE</div>
     </div>
 
     <script type="module">
@@ -114,9 +119,38 @@
         const db = getFirestore(app);
 
         async function init() {
-            const userStr = localStorage.getItem('discord_user');
-            if (userStr) {
-                const user = JSON.parse(userStr);
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const savedUser = localStorage.getItem('discord_user');
+
+            // 1. Zpracování návratu z Discordu (Kód v URL)
+            if (code) {
+                document.getElementById('login-content').innerHTML = `
+                    <h2 style="color:var(--secondary-neon)">OVĚŘOVÁNÍ...</h2>
+                    <p>Momentík, přihlašujeme tě do systému.</p>
+                `;
+                try {
+                    const res = await fetch(`/api/auth?code=${code}`);
+                    const data = await res.json();
+                    if (data.id) {
+                        localStorage.setItem('discord_user', JSON.stringify({
+                            discordId: data.id, 
+                            username: data.username, 
+                            avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
+                        }));
+                        // Přesměrování na čistou URL bez kódu, aby se proces neopakoval
+                        window.location.replace(window.location.origin);
+                    }
+                } catch (e) {
+                    alert("Chyba při přihlašování. Zkus to znovu.");
+                    window.location.replace(window.location.origin);
+                }
+                return;
+            }
+
+            // 2. Pokud je uživatel přihlášen, ukaž dashboard
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
                 document.body.classList.add('logged-in');
                 document.getElementById('user-name').innerText = user.username;
                 document.getElementById('user-avatar').src = user.avatar;
@@ -125,21 +159,22 @@
                     if (ds.exists()) {
                         const data = ds.data();
                         document.getElementById('status-text').innerText = (data.wlStatus || "NEZAŽÁDÁNO").toUpperCase();
-                        document.getElementById('attempts-text').innerText = `Zbývající pokusy: ${data.attempts || 3}/3`;
+                        document.getElementById('attempts-text').innerText = `Zbývající pokusy: ${data.attempts ?? 3}/3`;
                         if (data.role === "admin") document.getElementById('btn-admin').style.display = "block";
                     } else {
-                        setDoc(doc(db, "users", user.discordId), { username: user.username, wlStatus: "none", attempts: 3, role: "user" });
+                        // Vytvoření nového uživatele v DB
+                        setDoc(doc(db, "users", user.discordId), { 
+                            username: user.username, 
+                            wlStatus: "none", 
+                            attempts: 3, 
+                            role: "user" 
+                        });
                     }
                 });
             }
         }
 
-        document.getElementById('btn-apply').onclick = () => {
-            document.getElementById('gateway').classList.add('fly-away');
-            setTimeout(() => { window.location.href = "prihlaska.html"; }, 800);
-        };
-
-        window.logout = () => { localStorage.clear(); window.location.reload(); };
+        window.logout = () => { localStorage.clear(); window.location.replace(window.location.origin); };
         init();
     </script>
 </body>
