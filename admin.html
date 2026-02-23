@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMRP | Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-neon: #bc13fe; --secondary-neon: #00f2ff; --error-red: #ff3333; --success-green: #22ff22; }
+        
+        body, html {
+            margin: 0; padding: 0; min-height: 100vh;
+            font-family: 'Rajdhani', sans-serif; background: #000; color: white;
+        }
+
+        .page-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('pozadicko.jpg') no-repeat center center fixed;
+            background-size: cover; z-index: -1;
+        }
+
+        .admin-container { max-width: 1000px; margin: auto; padding: 40px 20px; }
+
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-neon); padding-bottom: 20px; margin-bottom: 40px; }
+        
+        h1 { color: var(--primary-neon); text-transform: uppercase; letter-spacing: 3px; margin: 0; }
+        .back-btn { text-decoration: none; color: white; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; transition: 0.3s; }
+        .back-btn:hover { background: var(--primary-neon); }
+
+        .app-card {
+            background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 25px; margin-bottom: 25px; transition: 0.3s;
+        }
+        .app-card:hover { border-color: var(--secondary-neon); }
+
+        .app-header { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px; }
+        .app-header h2 { margin: 0; color: var(--secondary-neon); }
+        .steam-id { font-size: 0.8rem; opacity: 0.5; font-family: monospace; }
+
+        .question { color: var(--primary-neon); font-weight: 700; margin-top: 15px; display: block; font-size: 0.9rem; }
+        .answer { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-top: 5px; display: block; border-left: 3px solid var(--primary-neon); }
+
+        .actions { display: flex; gap: 15px; margin-top: 25px; }
+        .btn { padding: 12px 25px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; text-transform: uppercase; flex: 1; transition: 0.3s; }
+        .btn-approve { background: var(--success-green); color: black; }
+        .btn-approve:hover { box-shadow: 0 0 20px var(--success-green); transform: scale(1.02); }
+        .btn-reject { background: var(--error-red); color: white; }
+        .btn-reject:hover { box-shadow: 0 0 20px var(--error-red); transform: scale(1.02); }
+
+        #no-apps { text-align: center; opacity: 0.5; font-size: 1.5rem; margin-top: 100px; }
+    </style>
+</head>
+<body>
+    <div class="page-bg"></div>
+    <div class="admin-container">
+        <header>
+            <h1>WL ADDER PANEL</h1>
+            <a href="index.html" class="back-btn">← ZPĚT</a>
+        </header>
+
+        <div id="apps-list">
+            </div>
+        <div id="no-apps" style="display:none;">Momentálně zde nejsou žádné nové žádosti.</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs",
+            authDomain: "cmrp-system.firebaseapp.com",
+            projectId: "cmrp-system",
+            storageBucket: "cmrp-system.firebasestorage.app",
+            appId: "1:264321137651:web:295e93bd12e7f8b80fb086"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // BEZPEČNOSTNÍ KONTROLA ADMINA
+        async function checkAdmin() {
+            const userStr = localStorage.getItem('discord_user');
+            if (!userStr) { window.location.href = "index.html"; return; }
+            
+            const user = JSON.parse(userStr);
+            const userRef = doc(db, "users", user.discordId);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists() || userSnap.data().role !== "admin") {
+                alert("PŘÍSTUP ZAMÍTNUT: Nejsi admin!");
+                window.location.href = "index.html";
+            } else {
+                loadApplications();
+            }
+        }
+
+        // NAČTENÍ ŽÁDOSTÍ V REÁLNÉM ČASE
+        function loadApplications() {
+            const list = document.getElementById('apps-list');
+            const noApps = document.getElementById('no-apps');
+
+            onSnapshot(collection(db, "zadosti"), (snapshot) => {
+                if (snapshot.empty) {
+                    list.innerHTML = "";
+                    noApps.style.display = "block";
+                    return;
+                }
+                
+                noApps.style.display = "none";
+                list.innerHTML = "";
+                
+                snapshot.forEach((docSnap) => {
+                    const d = docSnap.data();
+                    const id = docSnap.id;
+                    
+                    const card = document.createElement('div');
+                    card.className = "app-card";
+                    card.innerHTML = `
+                        <div class="app-header">
+                            <div>
+                                <h2>${d.discordTag}</h2>
+                                <span class="steam-id">ID: ${d.discordId} | HEX: ${d.steamHex}</span>
+                            </div>
+                        </div>
+                        
+                        <span class="question">2. LORE POSTAVY:</span>
+                        <span class="answer">${d.lore}</span>
+
+                        <span class="question">3. FEAR RP:</span>
+                        <span class="answer">${d.fear || 'Neuvedeno'}</span>
+
+                        <span class="question">4. METAGAMING:</span>
+                        <span class="answer">${d.meta || 'Neuvedeno'}</span>
+
+                        <span class="question">5. EMS CHOVÁNÍ:</span>
+                        <span class="answer">${d.ems || 'Neuvedeno'}</span>
+
+                        <span class="question">6. KARTOTÉKA:</span>
+                        <span class="answer">${d.kartoteka || 'Neuvedeno'}</span>
+
+                        <div class="actions">
+                            <button class="btn btn-approve" onclick="processWL('${d.discordId}', '${id}', 'schváleno')">Schválit</button>
+                            <button class="btn btn-reject" onclick="processWL('${d.discordId}', '${id}', 'zamítnuto')">Zamítnout</button>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+            });
+        }
+
+        // ZPRACOVÁNÍ SCHVÁLENÍ/ZAMÍTNUTÍ
+        window.processWL = async (userId, docId, status) => {
+            const confirmAction = confirm(`Opravdu chceš tuto žádost nastavit jako: ${status.toUpperCase()}?`);
+            if (!confirmAction) return;
+
+            try {
+                // 1. Aktualizujeme status uživatele v kolekci users
+                const userRef = doc(db, "users", userId);
+                
+                // Pokud zamítáme, můžeme snížit pokusy (volitelné)
+                if (status === 'zamítnuto') {
+                    const snap = await getDoc(userRef);
+                    const currentAttempts = snap.data().attempts || 3;
+                    await updateDoc(userRef, { 
+                        wlStatus: status,
+                        attempts: Math.max(0, currentAttempts - 1)
+                    });
+                } else {
+                    await updateDoc(userRef, { wlStatus: status });
+                }
+
+                // 2. Smažeme žádost z fronty
+                await deleteDoc(doc(db, "zadosti", docId));
+                
+                alert("Hotovo! Hráč byl informován prostřednictvím webu.");
+            } catch (error) {
+                console.error("Chyba:", error);
+                alert("Nastala chyba při ukládání.");
+            }
+        };
+
+        checkAdmin();
+    </script>
+</body>
+</html>
