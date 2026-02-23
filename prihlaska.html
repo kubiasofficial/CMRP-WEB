@@ -6,68 +6,60 @@
     <title>CMRP | Přihláška</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-neon: #bc13fe; 
-            --secondary-neon: #00f2ff;
-        }
+        :root { --primary-neon: #bc13fe; --secondary-neon: #00f2ff; }
 
         body, html {
             margin: 0; padding: 0; min-height: 100vh;
             font-family: 'Rajdhani', sans-serif;
-            background-color: #000; color: white;
+            background: #000; color: white;
             display: flex; justify-content: center; align-items: center;
         }
 
-        .background {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.75)), url('prihlaskapozadi.jpg');
-            background-size: cover; background-position: center; background-repeat: no-repeat;
+        /* OPRAVA - Pozadí teď bude v kuse po celé ploše */
+        .full-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('prihlaskapozadi.jpg');
+            background-size: cover; background-position: center;
             z-index: -1;
         }
 
         .container {
             width: 90%; max-width: 500px; padding: 40px;
-            background: rgba(10, 10, 10, 0.7); backdrop-filter: blur(20px);
-            border: 2px solid var(--primary-neon); border-radius: 30px; 
-            box-shadow: 0 0 50px rgba(188, 19, 254, 0.3);
+            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(15px);
+            border: 2px solid var(--primary-neon); border-radius: 30px;
+            box-shadow: 0 0 40px rgba(188, 19, 254, 0.2);
             position: relative;
-            transform: translateY(100vh);
-            animation: slideIn 0.8s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        @keyframes slideIn { to { transform: translateY(0); } }
 
         .btn-back {
             position: absolute; top: 20px; right: 20px;
             color: var(--secondary-neon); text-decoration: none;
-            font-weight: 700; border: 1px solid var(--secondary-neon);
-            padding: 5px 15px; border-radius: 10px; transition: 0.3s;
+            border: 1px solid var(--secondary-neon); padding: 5px 12px; border-radius: 8px; font-size: 0.8rem;
         }
-        .btn-back:hover { background: var(--secondary-neon); color: black; }
 
-        h1 { color: var(--primary-neon); text-transform: uppercase; text-align: center; margin-bottom: 30px; }
-        label { display: block; color: var(--secondary-neon); margin-bottom: 5px; font-weight: 700; }
+        h1 { color: var(--primary-neon); text-align: center; margin-bottom: 30px; letter-spacing: 2px; }
+        label { display: block; color: var(--secondary-neon); margin-bottom: 8px; font-weight: 700; font-size: 0.9rem; }
         
-        input {
-            width: 100%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255,255,255,0.15);
-            padding: 14px; border-radius: 12px; color: white; margin-bottom: 25px; box-sizing: border-box;
+        input, textarea {
+            width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px; border-radius: 10px; color: white; margin-bottom: 20px; box-sizing: border-box;
             font-family: 'Rajdhani';
         }
 
         .btn-submit {
             background: var(--primary-neon); color: white; border: none; width: 100%;
-            padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; transition: 0.3s;
+            padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="background"></div>
+    <div class="full-bg"></div>
     <div class="container">
         <a href="index.html" class="btn-back">← ZPĚT</a>
         <h1>NÁBOROVÝ PANEL</h1>
         <form id="applyForm">
             <label>STEAM HEX ID</label>
-            <input type="text" id="q_hex" placeholder="např. 1100001..." required>
+            <input type="text" id="q_hex" placeholder="1100001..." required>
             <label>JMÉNO POSTAVY (IC)</label>
             <input type="text" id="q_name" placeholder="John Doe" required>
             <button type="submit" class="btn-submit">ODESLAT PŘIHLÁŠKU</button>
