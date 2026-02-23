@@ -6,222 +6,106 @@
     <title>CMRP | Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-neon: #bc13fe; --secondary-neon: #00f2ff;
-            --success: #22ff22; --error: #ff2222;
-            --bg-dark: #050505; --card-bg: rgba(20, 20, 20, 0.9);
-        }
-        body, html {
-            margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif;
-            background: var(--bg-dark); color: white; overflow: hidden;
-        }
-        .stats-header {
-            height: 80px; display: flex; align-items: center; justify-content: space-around;
-            background: rgba(188, 19, 254, 0.1); border-bottom: 2px solid var(--primary-neon);
-        }
-        .stat-item { text-align: center; }
-        .stat-value { display: block; font-size: 1.5rem; font-weight: 700; color: var(--secondary-neon); }
-        .stat-label { font-size: 0.8rem; text-transform: uppercase; opacity: 0.7; }
-        
-        .dashboard-wrapper {
-            display: grid; grid-template-columns: 320px 1fr 350px;
-            height: calc(100vh - 80px); gap: 10px; padding: 10px; box-sizing: border-box;
-        }
+        :root { --primary-neon: #bc13fe; --secondary-neon: #00f2ff; --success: #22ff22; --error: #ff2222; --bg-dark: #050505; --card-bg: rgba(20, 20, 20, 0.9); }
+        body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; background: var(--bg-dark); color: white; overflow: hidden; }
+        .stats-header { height: 80px; display: flex; align-items: center; justify-content: space-around; background: rgba(188, 19, 254, 0.1); border-bottom: 2px solid var(--primary-neon); }
+        .stat-value { display: block; font-size: 1.5rem; font-weight: 700; color: var(--secondary-neon); text-align: center;}
+        .dashboard-wrapper { display: grid; grid-template-columns: 320px 1fr 350px; height: calc(100vh - 80px); gap: 10px; padding: 10px; box-sizing: border-box; }
         .column { background: var(--card-bg); border-radius: 20px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
-        .column-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .column-header h2 { margin: 0; font-size: 1.1rem; color: var(--primary-neon); text-transform: uppercase; }
+        .column-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
-
-        /* Karty */
         .app-card { background: rgba(255,255,255,0.03); border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
-        .log-item { font-size: 0.85rem; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); border-left: 3px solid var(--primary-neon); margin-bottom: 5px; }
-        .admin-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; margin-bottom: 8px; background: rgba(255,255,255,0.02); }
-        .admin-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary-neon); }
-        
-        .attempt-badge { background: var(--secondary-neon); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.75rem; }
-        .reason-box { background: rgba(255, 34, 34, 0.1); border: 1px solid var(--error); padding: 10px; border-radius: 8px; margin: 10px 0; font-size: 0.85rem; }
-        
         .btn-group { display: flex; gap: 8px; margin-top: 12px; }
-        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: 'Rajdhani'; transition: 0.2s; }
-        .btn-approve { background: var(--success); }
-        .btn-reject { background: var(--error); color: white; }
-        .btn:hover { opacity: 0.8; transform: scale(1.02); }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--primary-neon); border-radius: 10px; }
+        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: 'Rajdhani'; }
+        .admin-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; margin-bottom: 8px; }
+        .admin-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary-neon); }
+        .attempt-badge { background: var(--secondary-neon); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.75rem; }
     </style>
 </head>
 <body>
-
     <div class="stats-header">
-        <div class="stat-item"><span class="stat-value" id="stat-approved">0</span><span class="stat-label">Schváleno</span></div>
-        <div class="stat-item"><span class="stat-value" id="stat-pending">0</span><span class="stat-label">Čeká</span></div>
-        <div class="stat-item"><span class="stat-value" id="stat-rejected">0</span><span class="stat-label">Zamítnuto</span></div>
+        <div><span class="stat-value" id="stat-approved">0</span><small>SCHVÁLENO</small></div>
+        <div><span class="stat-value" id="stat-pending">0</span><small>ČEKÁ</small></div>
+        <div><span class="stat-value" id="stat-rejected">0</span><small>ZAMÍTNUTO</small></div>
         <button onclick="location.href='index.html'" class="btn" style="width:auto; background:none; border:1px solid white; color:white;">ZPĚT</button>
     </div>
 
     <div class="dashboard-wrapper">
-        <div class="column">
-            <div class="column-header"><h2>Poslední akce</h2></div>
-            <div class="scroll-area" id="log-list"></div>
-        </div>
-
-        <div class="column">
-            <div class="column-header"><h2>Žádosti k posouzení</h2></div>
-            <div class="scroll-area" id="requests-list"></div>
-        </div>
-
-        <div class="column">
-            <div class="column-header"><h2>WL Tým</h2></div>
-            <div class="scroll-area" id="team-list"></div>
-        </div>
+        <div class="column"><div class="column-header"><h2>Poslední akce</h2></div><div class="scroll-area" id="log-list"></div></div>
+        <div class="column"><div class="column-header"><h2>Žádosti</h2></div><div class="scroll-area" id="requests-list"></div></div>
+        <div class="column"><div class="column-header"><h2>WL Tým</h2></div><div class="scroll-area" id="team-list"></div></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, doc, onSnapshot, updateDoc, deleteDoc, addDoc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, onSnapshot, updateDoc, deleteDoc, addDoc, getDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
         const adminUser = JSON.parse(localStorage.getItem('discord_user'));
 
-        // 1. AKTUALIZACE AKTIVITY ADMINA
-        async function updateAdminActivity() {
-            if(adminUser) {
-                await updateDoc(doc(db, "users", adminUser.discordId), { lastActive: serverTimestamp() });
-            }
-        }
-        updateAdminActivity();
+        if(adminUser) updateDoc(doc(db, "users", adminUser.discordId), { lastActive: serverTimestamp() });
 
-        // 2. STATISTIKY (HORNÍ LIŠTA)
-        onSnapshot(collection(db, "users"), (snap) => {
-            let app = 0, rej = 0;
-            snap.forEach(d => {
-                if(d.data().wlStatus === "schváleno") app++;
-                if(d.data().wlStatus === "zamítnuto") rej++;
-            });
-            document.getElementById('stat-approved').innerText = app;
-            document.getElementById('stat-rejected').innerText = rej;
+        // Statistiky a Logy
+        onSnapshot(collection(db, "users"), (s) => {
+            let app = 0, rej = 0; s.forEach(d => { if(d.data().wlStatus === "schváleno") app++; if(d.data().wlStatus === "zamítnuto") rej++; });
+            document.getElementById('stat-approved').innerText = app; document.getElementById('stat-rejected').innerText = rej;
         });
+        onSnapshot(collection(db, "zadosti"), (s) => document.getElementById('stat-pending').innerText = s.size);
+        
+        onSnapshot(query(collection(db, "history"), orderBy("date", "desc"), limit(20)), (s) => {
+            const l = document.getElementById('log-list'); l.innerHTML = "";
+            s.forEach(d => { const da = d.data(); l.innerHTML += `<div style="padding:10px; font-size:0.8rem; border-bottom:1px solid #222"><strong>${da.adminName}</strong> -> ${da.playerName} (${da.status})</div>`; });
+        });
+
+        // WL Tým
+        onSnapshot(query(collection(db, "users"), where("role", "==", "admin")), (s) => {
+            const l = document.getElementById('team-list'); l.innerHTML = "";
+            s.forEach(d => {
+                const da = d.data(); const last = da.lastActive?.toDate() || new Date();
+                const diff = Math.floor((new Date() - last) / (1000*60*60*24));
+                l.innerHTML += `<div class="admin-item"><img src="${da.avatar}" class="admin-avatar"><div><h4>${da.username}</h4><small>S: ${da.approvedCount || 0} | Z: ${da.rejectedCount || 0}</small>${diff >= 1 ? `<div style="color:red;font-size:0.7rem">Neaktivní ${diff} dny</div>` : ''}</div></div>`;
+            });
+        });
+
+        // ŽÁDOSTI (RUČNÍ SEŘAZENÍ PRO LEPŠÍ FUNKCI)
         onSnapshot(collection(db, "zadosti"), (snap) => {
-            document.getElementById('stat-pending').innerText = snap.size;
-        });
-
-        // 3. SEZNAM WL TÝMU (VPRAVO)
-        onSnapshot(query(collection(db, "users"), where("role", "==", "admin")), (snap) => {
-            const list = document.getElementById('team-list');
-            list.innerHTML = "";
-            snap.forEach(d => {
-                const data = d.data();
-                const last = data.lastActive ? data.lastActive.toDate() : new Date();
-                const diffDays = Math.floor((new Date() - last) / (1000 * 60 * 60 * 24));
-                
-                const div = document.createElement('div');
-                div.className = "admin-item";
-                div.innerHTML = `
-                    <img src="${data.avatar || 'cmrp.png'}" class="admin-avatar">
-                    <div>
-                        <h4 style="margin:0">${data.username}</h4>
-                        <small style="opacity:0.6">S: ${data.approvedCount || 0} | Z: ${data.rejectedCount || 0}</small>
-                        ${diffDays >= 1 ? `<div class="inactivity-warning">Neaktivní ${diffDays} dny!</div>` : ''}
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-        });
-
-        // 4. LOGY (VLEVO)
-        onSnapshot(query(collection(db, "history"), orderBy("date", "desc"), limit(20)), (snap) => {
-            const list = document.getElementById('log-list');
-            list.innerHTML = "";
-            snap.forEach(d => {
-                const data = d.data();
-                const div = document.createElement('div');
-                div.className = "log-item";
-                div.innerHTML = `<strong>${data.adminName}</strong> -> <strong>${data.playerName}</strong> (${data.status})`;
-                list.appendChild(div);
-            });
-        });
-
-        // 5. ŽÁDOSTI (STŘED)
-        onSnapshot(query(collection(db, "zadosti"), orderBy("createdAt", "asc")), (snap) => {
             const list = document.getElementById('requests-list');
             list.innerHTML = snap.empty ? "<p style='text-align:center; opacity:0.5'>Žádné nové žádosti</p>" : "";
             
-            snap.forEach(async (sdoc) => {
+            const sorted = snap.docs.sort((a,b) => (a.data().createdAt?.seconds || 0) - (b.data().createdAt?.seconds || 0));
+
+            sorted.forEach(sdoc => {
                 const d = sdoc.data();
                 const div = document.createElement('div');
                 div.className = "app-card";
-                
-                // Získání minulé historie u 2. a 3. pokusu
-                let historyHTML = "";
-                if(d.attemptNumber > 1) {
-                    const hQuery = await getDocs(query(collection(db, "history"), where("playerID", "==", d.discordId), orderBy("date", "desc"), limit(1)));
-                    if(!hQuery.empty) {
-                        historyHTML = `<div class="reason-box"><strong>Důvod minulé chyby:</strong><br>${hQuery.docs[0].data().reason || "Neuvedeno"}</div>`;
-                    }
-                }
-
                 div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center">
-                        <div style="display:flex; align-items:center; gap:10px">
-                            <img src="${d.avatar || 'cmrp.png'}" style="width:35px; border-radius:50%">
-                            <strong style="font-size:1.1rem">${d.discordTag}</strong>
-                        </div>
-                        <span class="attempt-badge">POKUS Č. ${d.attemptNumber}</span>
-                    </div>
-                    ${historyHTML}
-                    <p style="font-size:0.9rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top:10px"><strong>Lore:</strong> ${d.lore}</p>
+                    <div style="display:flex;justify-content:space-between"><strong>${d.discordTag}</strong><span class="attempt-badge">POKUS ${d.attemptNumber}</span></div>
+                    <p style="font-size:0.85rem;margin:10px 0">${d.lore.substring(0, 150)}...</p>
                     <div class="btn-group">
-                        <button class="btn btn-approve" onclick="action('${d.discordId}', '${sdoc.id}', 'schváleno', '${d.discordTag}')">SCHVÁLIT</button>
-                        <button class="btn btn-reject" onclick="action('${d.discordId}', '${sdoc.id}', 'zamítnuto', '${d.discordTag}')">ZAMÍTNOUT</button>
+                        <button class="btn" style="background:var(--success)" onclick="action('${d.discordId}','${sdoc.id}','schváleno','${d.discordTag}')">SCHVÁLIT</button>
+                        <button class="btn" style="background:var(--error);color:white" onclick="action('${d.discordId}','${sdoc.id}','zamítnuto','${d.discordTag}')">ZAMÍTNOUT</button>
                     </div>
                 `;
                 list.appendChild(div);
             });
         });
 
-        // FUNKCE SCHVÁLENÍ / ZAMÍTNUTÍ
         window.action = async (pid, did, status, pTag) => {
-            let reason = "";
-            if(status === 'zamítnuto') {
-                reason = prompt("Důvod zamítnutí (hráč ho uvidí při příštím pokusu):");
-                if(reason === null) return;
-            }
+            let reason = status === 'zamítnuto' ? prompt("Důvod zamítnutí:") : "";
+            if(status === 'zamítnuto' && reason === null) return;
 
             try {
-                const userRef = doc(db, "users", pid);
                 const adminRef = doc(db, "users", adminUser.discordId);
-                const adminSnap = await getDoc(adminRef);
-                const adminData = adminSnap.data();
-
-                // 1. Aktualizace hráče
-                const pSnap = await getDoc(userRef);
-                const currentAtt = pSnap.data().attempts || 3;
-                await updateDoc(userRef, { 
-                    wlStatus: status,
-                    attempts: status === 'zamítnuto' ? Math.max(0, currentAtt - 1) : currentAtt
-                });
-
-                // 2. Statistiky admina
+                const aSnap = await getDoc(adminRef);
                 const statField = status === 'schváleno' ? 'approvedCount' : 'rejectedCount';
-                await updateDoc(adminRef, { [statField]: (adminData[statField] || 0) + 1 });
 
-                // 3. Zápis do historie
-                await addDoc(collection(db, "history"), {
-                    adminName: adminUser.username,
-                    playerID: pid,
-                    playerName: pTag,
-                    status: status,
-                    reason: reason,
-                    date: serverTimestamp()
-                });
-
-                // 4. Smazání z fronty
+                await updateDoc(doc(db, "users", pid), { wlStatus: status });
+                await updateDoc(adminRef, { [statField]: (aSnap.data()[statField] || 0) + 1 });
+                await addDoc(collection(db, "history"), { adminName: adminUser.username, playerName: pTag, playerID: pid, status, reason, date: serverTimestamp() });
                 await deleteDoc(doc(db, "zadosti", did));
-            } catch (e) { alert("Chyba: " + e.message); }
+            } catch (e) { alert(e.message); }
         };
     </script>
 </body>
