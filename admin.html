@@ -3,265 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMRP | Admin Dashboard</title>
+    <title>CMRP | Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #bc13fe; --secondary: #00f2ff; --success: #22ff22; --error: #ff2222; --bg: #050505; }
-        body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: white; overflow: hidden; }
-        
-        /* Horní lišta */
-        .stats-header { height: 70px; display: flex; align-items: center; justify-content: space-around; background: rgba(188, 19, 254, 0.1); border-bottom: 2px solid var(--primary); }
-        .stat-item { text-align: center; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; display: block; line-height: 1; }
-        .stat-label { font-size: 0.7rem; opacity: 0.7; text-transform: uppercase; }
-
-        /* Rozvržení */
-        .dashboard-wrapper { display: grid; grid-template-columns: 320px 1fr 350px; height: calc(100vh - 70px); gap: 10px; padding: 10px; box-sizing: border-box; }
-        .column { background: rgba(20,20,20,0.9); border-radius: 20px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
-        .column-header { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); }
-        .scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
-
-        /* Karty */
-        .app-card { background: rgba(255,255,255,0.03); border-radius: 15px; padding: 15px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-        .app-card:hover { border-color: var(--primary); background: rgba(188, 19, 254, 0.05); }
-        
-        /* Modal */
-        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); align-items: center; justify-content: center; }
-        .modal-content { background: #111; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 800px; max-height: 85vh; overflow-y: auto; padding: 30px; position: relative; }
-        .detail-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 3px solid var(--secondary); font-size: 0.95rem; line-height: 1.4; }
-        
-        /* UI Prvky */
-        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-family: 'Rajdhani'; transition: 0.2s; text-transform: uppercase; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-outline { background: none; border: 1px solid rgba(255,255,255,0.3); color: white; }
-        .btn-outline:hover { background: white; color: black; }
-        
-        .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
-        .input-dark { background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; flex: 1; font-family: 'Rajdhani'; }
-        
-        .user-manage-result { background: rgba(188, 19, 254, 0.05); padding: 15px; border-radius: 15px; border: 1px solid var(--primary); display: none; margin-top: 10px; }
-        .log-item { font-size: 0.8rem; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        :root { --primary: #bc13fe; --secondary: #00f2ff; --error: #ff2222; --success: #22ff22; }
+        body { 
+            margin: 0; padding: 20px; font-family: 'Rajdhani', sans-serif; background: #0a0a0a; color: white; 
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover;
+        }
+        .admin-container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        .zadost-card { 
+            background: rgba(20,20,20,0.95); border: 1px solid #333; border-radius: 15px; padding: 25px; margin-bottom: 25px;
+            transition: 0.3s; backdrop-filter: blur(10px);
+        }
+        .zadost-card:hover { border-color: var(--primary); }
+        .user-info { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .user-info img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--primary); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .q-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border-left: 3px solid var(--secondary); }
+        .q-box strong { color: var(--secondary); display: block; margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; }
+        .actions { margin-top: 25px; display: flex; gap: 15px; align-items: center; }
+        .reason-input { flex-grow: 1; background: #111; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; font-family: 'Rajdhani'; }
+        button { padding: 12px 25px; border: none; border-radius: 8px; font-family: 'Rajdhani'; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-approve { background: var(--success); color: black; }
+        .btn-reject { background: var(--error); color: white; }
+        button:hover { transform: scale(1.05); opacity: 0.9; }
     </style>
 </head>
 <body>
 
-    <div class="stats-header">
-        <div class="stat-item"><span id="stat-pending" class="stat-value" style="color:var(--secondary)">0</span><span class="stat-label">Čeká</span></div>
-        <div class="stat-item"><span id="stat-approved" class="stat-value" style="color:var(--success)">0</span><span class="stat-label">Schváleno</span></div>
-        <div class="stat-item"><span id="stat-rejected" class="stat-value" style="color:var(--error)">0</span><span class="stat-label">Zamítnuto</span></div>
-        <div style="display:flex; gap:10px">
-            <button onclick="location.href='index.html'" class="btn btn-outline">Zpět na web</button>
-            <button onclick="logout()" class="btn" style="background:var(--error); color:white">Odhlásit</button>
-        </div>
+<div class="admin-container">
+    <div class="header">
+        <h1>🛡️ CMRP | WL SPRÁVA</h1>
+        <button onclick="location.href='index.html'" style="background: #333; color: white;">Zpět na Dashboard</button>
     </div>
-
-    <div class="dashboard-wrapper">
-        <div class="column">
-            <div class="column-header"><h2>Poslední akce</h2></div>
-            <div class="scroll-area" id="log-list"></div>
+    <div id="zadosti-list">
         </div>
+</div>
 
-        <div class="column">
-            <div class="column-header"><h2>Fronta žádostí</h2></div>
-            <div class="scroll-area" id="requests-list"></div>
-        </div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, deleteDoc, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        <div class="column">
-            <div class="column-header"><h2>Správa uživatelů</h2></div>
-            <div class="scroll-area">
-                <div class="search-box">
-                    <input type="text" id="search-id" class="input-dark" placeholder="Vlož Discord ID...">
-                    <button class="btn btn-primary" id="searchBtn">Hledat</button>
-                </div>
-                
-                <div id="user-result" class="user-manage-result">
-                    <div id="user-info" style="margin-bottom:15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;"></div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px">
-                        <button class="btn" style="background:var(--success); color:black" id="resetBtn">Reset (3 pokusy)</button>
-                        <button class="btn" style="background:var(--secondary); color:black" id="addAttemptBtn">+1 Výjimka</button>
-                        <button class="btn" style="background:var(--error); color:white; grid-column: span 2" id="clearStatusBtn">Smazat Status (None)</button>
-                    </div>
-                </div>
+    const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-                <hr style="opacity:0.1; margin:25px 0">
-                <h2>Aktivní WL Tým</h2>
-                <div id="team-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="appModal" class="modal">
-        <div class="modal-content">
-            <div id="modal-body"></div>
-            <button class="btn btn-outline" style="width:100%; margin-top:20px" onclick="document.getElementById('appModal').style.display='none'">Zavřít bez akce</button>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, doc, onSnapshot, updateDoc, deleteDoc, addDoc, getDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        const adminUser = JSON.parse(localStorage.getItem('discord_user'));
-        if(!adminUser) location.href = 'index.html';
-
-        window.logout = () => { localStorage.clear(); location.href = 'index.html'; };
-
-        let cachedDocs = [];
-
-        // 1. ŽÁDOSTI (STŘED)
-        onSnapshot(collection(db, "zadosti"), (snap) => {
-            cachedDocs = snap.docs;
-            const list = document.getElementById('requests-list');
-            document.getElementById('stat-pending').innerText = snap.size;
-            list.innerHTML = snap.empty ? "<p style='opacity:0.5; text-align:center; margin-top:20px'>Žádné nové žádosti ve frontě.</p>" : "";
-            
-            snap.forEach(sdoc => {
-                const d = sdoc.data();
-                const div = document.createElement('div');
-                div.className = "app-card";
-                div.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:12px">
-                        <img src="${d.avatar}" style="width:45px; border-radius:50%; border:1px solid var(--primary)">
-                        <div style="flex:1">
-                            <strong style="font-size:1.1rem">${d.discordTag}</strong><br>
-                            <small style="opacity:0.6">Pokus č. ${d.attemptNumber} | ID: ${d.discordId}</small>
-                        </div>
-                        <button class="btn btn-primary" onclick="viewDetails('${sdoc.id}')">Detail</button>
-                    </div>`;
-                list.appendChild(div);
+    // FUNKCE PRO ODESLÁNÍ DM PŘES API
+    async function sendDiscordDM(discordId, status, reason = "") {
+        try {
+            await fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discordId, status, reason })
             });
-        });
+        } catch (err) { console.error("Chyba DM:", err); }
+    }
 
-        // 2. DETAIL ŽÁDOSTI (MODAL)
-        window.viewDetails = (id) => {
-            const docRef = cachedDocs.find(r => r.id === id);
-            if(!docRef) return;
-            const d = docRef.data();
-
-            document.getElementById('modal-body').innerHTML = `
-                <div style="display:flex; align-items:center; gap:20px; margin-bottom:25px; border-bottom:1px solid #333; padding-bottom:15px">
-                    <img src="${d.avatar}" style="width:70px; border-radius:50%; border:2px solid var(--primary)">
+    onSnapshot(collection(db, "zadosti"), (snapshot) => {
+        const list = document.getElementById('zadosti-list');
+        list.innerHTML = snapshot.empty ? "<p style='text-align:center; opacity:0.5;'>Žádné aktivní žádosti k vyřízení.</p>" : "";
+        snapshot.forEach(ds => {
+            const d = ds.data();
+            const card = document.createElement('div');
+            card.className = "zadost-card";
+            card.innerHTML = `
+                <div class="user-info">
+                    <img src="${d.avatar}">
                     <div>
-                        <h2 style="margin:0; color:var(--secondary)">${d.discordTag}</h2>
-                        <small style="opacity:0.5">HEX: ${d.steamHex} | Discord ID: ${d.discordId}</small>
+                        <strong style="font-size: 1.4rem;">${d.discordTag}</strong><br>
+                        <span style="color:var(--secondary);">Steam: ${d.steamHex}</span>
                     </div>
                 </div>
-                <div class="detail-box"><strong>Lore Postavy:</strong><br>${d.lore}</div>
-                <div class="detail-box"><strong>Fear RP:</strong><br>${d.fear}</div>
-                <div class="detail-box"><strong>Metagaming:</strong><br>${d.meta}</div>
-                <div class="detail-box"><strong>EMS Situace:</strong><br>${d.ems}</div>
-                <div class="detail-box"><strong>Kartotéka:</strong><br>${d.kartoteka}</div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:25px">
-                    <button class="btn" style="background:var(--success); color:black; height:50px" onclick="processRequest('${d.discordId}','${id}','schváleno','${d.discordTag}')">Schválit hráče</button>
-                    <button class="btn" style="background:var(--error); color:white; height:50px" onclick="processRequest('${d.discordId}','${id}','zamítnuto','${d.discordTag}')">Zamítnout s důvodem</button>
-                </div>`;
-            document.getElementById('appModal').style.display = "flex";
-        };
-
-        // 3. ZPRACOVÁNÍ (ZÁPIS HISTORIE)
-        window.processRequest = async (pid, did, status, pTag) => {
-            let reason = status === 'zamítnuto' ? prompt("Udejte důvod zamítnutí (uvidí ho hráč):") : "Vítej na serveru!";
-            if(status === 'zamítnuto' && (reason === null || reason === "")) return alert("Důvod musí být vyplněn!");
-
-            try {
-                // Aktualizace statusu uživatele
-                await updateDoc(doc(db, "users", pid), { wlStatus: status });
-
-                // Zápis do historie (klíčové pro zobrazení důvodu v index.html)
-                await addDoc(collection(db, "history"), {
-                    adminName: adminUser.username,
-                    playerName: pTag,
-                    playerID: pid,
-                    status: status,
-                    reason: reason,
-                    date: serverTimestamp()
-                });
-
-                // Smazání z fronty
-                await deleteDoc(doc(db, "zadosti", did));
-                
-                document.getElementById('appModal').style.display = 'none';
-            } catch (e) { alert("Chyba: " + e.message); }
-        };
-
-        // 4. SPRÁVA UŽIVATELŮ (HLEDÁNÍ)
-        let currentSearchId = "";
-        document.getElementById('searchBtn').onclick = async () => {
-            currentSearchId = document.getElementById('search-id').value.trim();
-            if(!currentSearchId) return;
-            
-            const snap = await getDoc(doc(db, "users", currentSearchId));
-            const resBox = document.getElementById('user-result');
-            
-            if(snap.exists()) {
-                const d = snap.data();
-                document.getElementById('user-info').innerHTML = `
-                    <div style="display:flex; align-items:center; gap:10px">
-                        <img src="${d.avatar || ''}" style="width:30px; border-radius:50%">
-                        <strong>${d.username}</strong>
-                    </div>
-                    <div style="margin-top:8px; font-size:0.85rem">
-                        Stav: <span style="color:var(--secondary)">${d.wlStatus || 'none'}</span><br>
-                        Zbývající pokusy: <strong>${d.attempts ?? 3}</strong>
-                    </div>`;
-                resBox.style.display = 'block';
-            } else alert("Uživatel s tímto ID nebyl v databázi nalezen.");
-        };
-
-        document.getElementById('resetBtn').onclick = async () => {
-            await updateDoc(doc(db, "users", currentSearchId), { attempts: 3, wlStatus: "none" });
-            document.getElementById('searchBtn').click();
-            alert("Uživatel resetován na 3 pokusy.");
-        };
-
-        document.getElementById('addAttemptBtn').onclick = async () => {
-            const snap = await getDoc(doc(db, "users", currentSearchId));
-            const current = snap.data().attempts || 0;
-            await updateDoc(doc(db, "users", currentSearchId), { attempts: current + 1 });
-            document.getElementById('searchBtn').click();
-        };
-
-        document.getElementById('clearStatusBtn').onclick = async () => {
-            await updateDoc(doc(db, "users", currentSearchId), { wlStatus: "none" });
-            document.getElementById('searchBtn').click();
-        };
-
-        // 5. HISTORIE & STATISTIKY
-        onSnapshot(query(collection(db, "history"), orderBy("date", "desc"), limit(20)), (s) => {
-            const list = document.getElementById('log-list');
-            list.innerHTML = "";
-            let app = 0, rej = 0;
-            s.forEach(d => {
-                const da = d.data();
-                if(da.status === "schváleno") app++; if(da.status === "zamítnuto") rej++;
-                list.innerHTML += `<div class="log-item"><strong>${da.adminName}</strong> ${da.status === 'schváleno' ? '✅' : '❌'} ${da.playerName}</div>`;
-            });
+                <div class="grid">
+                    <div class="q-box"><strong>Lore</strong>${d.lore}</div>
+                    <div class="q-box"><strong>Fear RP</strong>${d.fear}</div>
+                    <div class="q-box"><strong>Metagaming</strong>${d.meta}</div>
+                    <div class="q-box"><strong>EMS Situace</strong>${d.ems}</div>
+                </div>
+                <div class="actions">
+                    <input type="text" id="reason-${ds.id}" class="reason-input" placeholder="Důvod zamítnutí (volitelné u schválení)">
+                    <button class="btn-approve" onclick="processAction('${ds.id}', '${d.discordId}', 'schváleno')">Schválit</button>
+                    <button class="btn-reject" onclick="processAction('${ds.id}', '${d.discordId}', 'zamítnuto')">Zamítnout</button>
+                </div>
+            `;
+            list.appendChild(card);
         });
+    });
 
-        onSnapshot(collection(db, "users"), (snap) => {
-            let a = 0, r = 0;
-            snap.forEach(d => {
-                if(d.data().wlStatus === "schváleno") a++;
-                if(d.data().wlStatus === "zamítnuto") r++;
-            });
-            document.getElementById('stat-approved').innerText = a;
-            document.getElementById('stat-rejected').innerText = r;
-        });
+    window.processAction = async (docId, discordId, status) => {
+        const reason = document.getElementById(`reason-${docId}`).value;
+        if (status === 'zamítnuto' && !reason) return alert("Musíš uvést důvod zamítnutí!");
 
-        onSnapshot(query(collection(db, "users"), where("role", "==", "admin")), (s) => {
-            const l = document.getElementById('team-list'); l.innerHTML = "";
-            s.forEach(d => {
-                const da = d.data();
-                l.innerHTML += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; background:rgba(255,255,255,0.02); padding:8px; border-radius:10px">
-                    <img src="${da.avatar}" style="width:30px; border-radius:50%">
-                    <span style="font-size:0.9rem">${da.username}</span>
-                </div>`;
+        if (confirm(`Opravdu nastavit: ${status.toUpperCase()}?`)) {
+            // Update uživatele a historie v DB
+            await updateDoc(doc(db, "users", discordId), { wlStatus: status });
+            await addDoc(collection(db, "history"), {
+                playerID: discordId,
+                status: status,
+                reason: reason || "Schváleno",
+                date: serverTimestamp()
             });
-        });
-    </script>
+            await deleteDoc(doc(db, "zadosti", docId));
+
+            // ODESLÁNÍ DM PŘES BOTA
+            await sendDiscordDM(discordId, status, reason);
+            alert("Vyřízeno a zpráva odeslána na Discord.");
+        }
+    };
+</script>
 </body>
 </html>
