@@ -6,93 +6,123 @@
     <title>CMRP | Nábor</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary-neon: #bc13fe; --secondary-neon: #00f2ff; }
-        body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; background: #000; color: white; }
-        .page-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('prihlaskapozadi.jpg') no-repeat center center fixed; background-size: cover; z-index: -1; }
-        .main-wrapper { display: flex; justify-content: center; align-items: center; padding: 50px 20px; min-height: 100vh; box-sizing: border-box; }
-        .form-container { width: 100%; max-width: 750px; background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(20px); border: 2px solid var(--primary-neon); border-radius: 30px; padding: 40px; position: relative; }
-        h1 { color: var(--primary-neon); text-align: center; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; }
-        label { color: var(--secondary-neon); font-weight: 700; display: block; margin-bottom: 8px; margin-top: 20px; font-size: 0.9rem; }
-        input, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; font-size: 1rem; }
-        textarea { height: 100px; resize: vertical; }
-        .btn-submit { background: var(--primary-neon); color: white; border: none; width: 100%; padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; margin-top: 30px; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
-        .back-link { position: absolute; top: 20px; left: 20px; color: white; text-decoration: none; opacity: 0.6; font-weight: 700; }
+        :root { --primary: #bc13fe; --secondary: #00f2ff; }
+        body { 
+            margin: 0; padding: 40px 20px; font-family: 'Rajdhani', sans-serif; color: white;
+            background: #050505; display: flex; justify-content: center;
+        }
+        .form-container { 
+            width: 100%; max-width: 800px; background: rgba(20,20,20,0.9); 
+            padding: 40px; border-radius: 30px; border: 1px solid var(--primary);
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.15);
+        }
+        h1 { text-align: center; color: var(--primary); text-transform: uppercase; letter-spacing: 5px; margin-bottom: 40px; }
+        
+        .input-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 10px; font-weight: bold; color: var(--secondary); text-transform: uppercase; font-size: 0.9rem; }
+        
+        input, textarea { 
+            width: 100%; background: #111; border: 1px solid #333; 
+            padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani';
+            box-sizing: border-box; font-size: 1rem;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; background: #161616; }
+        
+        .btn-submit { 
+            width: 100%; padding: 15px; background: var(--primary); border: none; 
+            border-radius: 10px; color: white; font-weight: bold; font-size: 1.2rem;
+            cursor: pointer; text-transform: uppercase; margin-top: 20px; transition: 0.3s;
+        }
+        .btn-submit:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--primary); }
+        .btn-back { display: inline-block; margin-bottom: 20px; color: white; text-decoration: none; opacity: 0.5; }
+        .btn-back:hover { opacity: 1; }
     </style>
 </head>
 <body>
-    <div class="page-bg"></div>
-    <div class="main-wrapper">
-        <div class="form-container" id="form-box">
-            <a href="index.html" class="back-link">← ZPĚT</a>
-            <h1>NÁBOROVÝ PANEL</h1>
-            <form id="applyForm">
+
+    <div class="form-container">
+        <a href="index.html" class="btn-back">← ZPĚT NA DASHBOARD</a>
+        <h1>Náborový Panel</h1>
+        
+        <form id="wl-form">
+            <div class="input-group">
                 <label>1. STEAM HEX ID</label>
-                <input type="text" id="hex" required>
-                <label>2. LORE POSTAVY</label>
-                <textarea id="lore" required></textarea>
+                <input type="text" id="steamHex" placeholder="steam:1100001..." required>
+            </div>
+            <div class="input-group">
+                <label>2. LORE POSTAVY (Min. 100 slov)</label>
+                <textarea id="lore" rows="6" placeholder="Kdo je tvá postava a jaký má příběh?" required></textarea>
+            </div>
+            <div class="input-group">
                 <label>3. CO JE TO FEAR RP?</label>
-                <textarea id="fear" required></textarea>
+                <textarea id="fear" rows="3" required></textarea>
+            </div>
+            <div class="input-group">
                 <label>4. CO JE TO METAGAMING?</label>
-                <textarea id="meta" required></textarea>
+                <textarea id="meta" rows="3" required></textarea>
+            </div>
+            <div class="input-group">
                 <label>5. PO TRANSPORTU SCRIPTEM (MÍSTNÍ EMS)...</label>
-                <textarea id="ems" required></textarea>
+                <textarea id="ems" rows="3" placeholder="Jak se tvá postava cítí a co si pamatuje?" required></textarea>
+            </div>
+            <div class="input-group">
                 <label>6. JAKÝM STYLEM VYPLŇUJEME KARTOTÉKU?</label>
-                <textarea id="kartoteka" required></textarea>
-                <button type="submit" class="btn-submit">ODESLAT PŘIHLÁŠKU</button>
-            </form>
-        </div>
-        <div class="form-container" id="success-msg" style="display:none; text-align:center;">
-            <h2 style="color:var(--secondary-neon)">ŽÁDOST BYLA ODESLÁNA!</h2>
-            <p>Tvoje žádost nyní čeká na posouzení. Aktuální stav vidíš na webu.</p>
-            <button onclick="location.href='index.html'" class="btn-submit">NÁVRAT NA DASHBOARD</button>
-        </div>
+                <textarea id="kartoteka" rows="2" required></textarea>
+            </div>
+            
+            <button type="submit" class="btn-submit">Odeslat žádost</button>
+        </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        document.getElementById('applyForm').onsubmit = async (e) => {
+        const user = JSON.parse(localStorage.getItem('discord_user'));
+        if(!user) location.href = 'index.html';
+
+        document.getElementById('wl-form').onsubmit = async (e) => {
             e.preventDefault();
-            const user = JSON.parse(localStorage.getItem('discord_user'));
-            if (!user) return alert("Musíš být přihlášen!");
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.innerText = "ODESÍLÁM...";
 
             try {
-                const userRef = doc(db, "users", user.discordId);
-                const userSnap = await getDoc(userRef);
-                const attemptsRemaining = userSnap.exists() ? (userSnap.data().attempts ?? 3) : 3;
+                const userDoc = await getDoc(doc(db, "users", user.discordId));
+                const attempts = userDoc.data()?.attempts ?? 3;
 
-                if (attemptsRemaining <= 0) return alert("Už nemáš pokusy!");
-
-                const currentAttempt = (3 - attemptsRemaining) + 1;
-
-                await addDoc(collection(db, "zadosti"), {
+                // Uložení žádosti
+                await setDoc(doc(db, "zadosti", user.discordId), {
                     discordId: user.discordId,
                     discordTag: user.username,
                     avatar: user.avatar,
-                    steamHex: document.getElementById('hex').value,
+                    steamHex: document.getElementById('steamHex').value,
                     lore: document.getElementById('lore').value,
                     fear: document.getElementById('fear').value,
                     meta: document.getElementById('meta').value,
                     ems: document.getElementById('ems').value,
                     kartoteka: document.getElementById('kartoteka').value,
-                    attemptNumber: currentAttempt,
-                    status: "čeká",
-                    createdAt: serverTimestamp()
+                    attemptNumber: (4 - attempts),
+                    submittedAt: serverTimestamp()
                 });
 
-                await updateDoc(userRef, { 
+                // Update stavu uživatele
+                await updateDoc(doc(db, "users", user.discordId), {
                     wlStatus: "v řešení",
-                    attempts: attemptsRemaining - 1 
+                    attempts: attempts - 1
                 });
 
-                document.getElementById('form-box').style.display = 'none';
-                document.getElementById('success-msg').style.display = 'block';
-            } catch (err) { alert("Chyba: " + err.message); }
+                alert("Žádost byla úspěšně odeslána!");
+                location.href = 'index.html';
+            } catch (err) {
+                alert("Chyba: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "ODESLAT ŽÁDOST";
+            }
         };
     </script>
 </body>

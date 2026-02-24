@@ -3,187 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community Roleplay | Systém</title>
+    <title>CMRP | Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --primary: #bc13fe; 
-            --secondary: #00f2ff; 
-            --error: #ff2222; 
-            --success: #22ff22;
-            --bg-dark: #0a0a0a;
-        }
-
+        :root { --primary: #bc13fe; --secondary: #00f2ff; --error: #ff2222; --success: #22ff22; }
+        
         body, html { 
-            margin: 0; 
-            padding: 0; 
-            min-height: 100vh; 
-            font-family: 'Rajdhani', sans-serif; 
-            color: white; 
-            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            overflow-x: hidden;
-        }
-
-        /* Video nebo obrázek na pozadí */
-        .bg-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9));
-            z-index: -1;
+            margin: 0; padding: 0; min-height: 100vh; 
+            font-family: 'Rajdhani', sans-serif; color: white;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), 
+                        url('https://i.imgur.com/your-background-image.jpg') no-repeat center center fixed; 
+            background-size: cover;
+            display: flex; align-items: center; justify-content: center;
         }
 
         #login-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--bg-dark); z-index: 999; 
+            background: rgba(0,0,0,0.9); z-index: 1000; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
         .logged-in #login-overlay { display: none; }
 
-        .main-container {
-            max-width: 1000px;
-            width: 90%;
-            text-align: center;
-            animation: fadeIn 0.8s ease-out;
-        }
+        .dashboard { width: 90%; max-width: 1200px; text-align: center; }
 
-        #user-avatar { 
-            width: 120px; height: 120px;
-            border-radius: 50%; 
-            border: 4px solid var(--primary); 
-            margin-bottom: 10px;
-            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
-        }
+        #user-avatar { width: 110px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 10px; box-shadow: 0 0 20px var(--primary); }
+        #user-name { font-size: 3.5rem; margin: 0 0 30px 0; text-transform: uppercase; letter-spacing: 4px; color: white; }
 
-        #user-name { 
-            color: var(--primary); 
-            font-size: 3.5rem; 
-            margin: 0 0 40px 0; 
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            text-shadow: 0 0 15px rgba(188, 19, 254, 0.6);
-        }
-
-        .card-container { 
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-bottom: 50px;
-        }
-
+        .card-container { display: flex; gap: 25px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
         .card { 
-            background: rgba(20, 20, 20, 0.8); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            border-radius: 20px; 
-            padding: 40px 20px; 
-            text-align: center; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
+            background: rgba(15, 15, 15, 0.85); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 25px; padding: 40px 20px; width: 280px; 
+            transition: 0.3s; cursor: pointer; backdrop-filter: blur(10px);
         }
+        .card:hover { border-color: var(--primary); transform: translateY(-8px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .status-card { border-bottom: 5px solid #ffcc00; cursor: default; }
 
-        .card:hover { 
-            border-color: var(--primary); 
-            transform: translateY(-10px);
-            background: rgba(30, 30, 30, 0.9);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-        }
-
-        .card i { font-size: 3rem; margin-bottom: 15px; display: block; }
-
-        .status-card { border-bottom: 4px solid #ffcc00; cursor: default; }
-
-        .reason-box { 
-            background: rgba(255, 34, 34, 0.1); 
-            border-left: 3px solid var(--error); 
-            border-radius: 5px; 
-            padding: 10px; 
-            margin-top: 15px; 
-            font-size: 0.85rem; 
-            color: #ffbaba;
-            text-align: left;
-        }
+        .reason-box { background: rgba(255, 34, 34, 0.15); border: 1px solid var(--error); border-radius: 10px; padding: 12px; margin-top: 15px; font-size: 0.9rem; color: #ffbaba; text-align: left; }
         
-        /* Tlačítka */
-        .logout-btn { 
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: 'Rajdhani';
-            font-weight: 700;
-            text-transform: uppercase;
-            transition: 0.3s;
-        }
-        .logout-btn:hover { 
-            background: var(--error); 
-            border-color: var(--error);
-            box-shadow: 0 0 15px rgba(255, 34, 34, 0.4);
-        }
+        .logout-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 30px; border-radius: 10px; cursor: pointer; font-family: 'Rajdhani'; font-weight: bold; transition: 0.3s; }
+        .logout-btn:hover { background: var(--error); border-color: var(--error); }
 
-        .btn-discord {
-            background: #5865F2;
-            color: white;
-            padding: 18px 45px;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: 0.3s;
-            display: inline-block;
-        }
-        .btn-discord:hover { background: #4752c4; transform: scale(1.05); }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Responzivita pro mobily */
-        @media (max-width: 600px) {
-            #user-name { font-size: 2.2rem; }
-            .card-container { grid-template-columns: 1fr; }
-        }
+        .btn-discord { background: #5865F2; color: white; padding: 15px 40px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-    <div class="bg-overlay"></div>
-
     <div id="login-overlay">
-        <h1 style="color: var(--primary); font-size: 4rem; margin-bottom: 5px;">CMRP</h1>
-        <p style="opacity: 0.6; margin-bottom: 40px; letter-spacing: 2px;">NÁBOROVÝ SYSTÉM</p>
-        <a class="btn-discord" href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email">
-            VSTOUPIT PŘES DISCORD
-        </a>
+        <h1 style="color:var(--primary); font-size:4rem; margin-bottom:30px;">CMRP</h1>
+        <a class="btn-discord" href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email">PŘIHLÁSIT PŘES DISCORD</a>
     </div>
 
-    <div id="main-ui" class="main-container" style="display:none;">
+    <div id="main-ui" class="dashboard" style="display:none;">
         <img id="user-avatar" src="">
         <h1 id="user-name">HRÁČ</h1>
 
         <div class="card-container">
-            <div class="card" id="btn-prihlaska" style="border-bottom: 4px solid var(--secondary);">
+            <div class="card" id="btn-prihlaska" style="border-bottom: 5px solid var(--secondary);">
                 <span style="font-size: 3rem;">📄</span>
-                <h3 style="margin: 10px 0;">PŘIHLÁŠKA</h3>
-                <p style="font-size: 0.8rem; opacity: 0.5;">Podat žádost o vstup</p>
+                <h3 style="letter-spacing: 2px;">PŘIHLÁŠKA</h3>
+                <p style="opacity: 0.6; font-size: 0.8rem;">Odeslat novou žádost o WL</p>
             </div>
 
             <div class="card status-card" id="status-card">
                 <span style="font-size: 3rem;">🛡️</span>
-                <h3 style="margin: 10px 0;">STAV WL</h3>
-                <div id="status-text" style="font-weight:bold; color:#ffcc00; font-size: 1.4rem;">NAČÍTÁNÍ...</div>
-                <div id="attempts-text" style="font-size:0.8rem; opacity:0.6; margin-top: 5px;">Pokusy: -/-</div>
+                <h3 style="letter-spacing: 2px;">STAV WL</h3>
+                <div id="status-text" style="font-weight:bold; color:#ffcc00; font-size: 1.3rem;">NAČÍTÁNÍ...</div>
+                <div id="attempts-text" style="font-size:0.8rem; opacity:0.7; margin-top: 5px;">Pokusy: -/-</div>
                 <div id="reason-area"></div>
             </div>
 
-            <div id="btn-admin" class="card" style="display:none; border-bottom:4px solid var(--primary)" onclick="location.href='admin.html'">
+            <div id="btn-admin" class="card" style="display:none; border-bottom: 5px solid var(--primary);" onclick="location.href='admin.html'">
                 <span style="font-size: 3rem;">👔</span>
-                <h3 style="margin: 10px 0;">WL ADDER</h3>
-                <p style="font-size: 0.8rem; opacity: 0.5;">Správa systému</p>
+                <h3 style="letter-spacing: 2px;">WL ADDER</h3>
+                <p style="opacity: 0.6; font-size: 0.8rem;">Administrace žádostí</p>
             </div>
         </div>
 
@@ -214,30 +106,26 @@
                     const status = d.wlStatus || "none";
                     const att = d.attempts ?? 3;
                     
-                    const st = document.getElementById('status-text');
-                    st.innerText = status.toUpperCase();
+                    document.getElementById('status-text').innerText = status.toUpperCase();
                     document.getElementById('attempts-text').innerText = `ZBÝVAJÍCÍ POKUSY: ${att}/3`;
                     
                     const sCard = document.getElementById('status-card');
-                    if(status === "schváleno") { sCard.style.borderColor = "var(--success)"; st.style.color = "var(--success)"; }
-                    else if(status === "zamítnuto") { sCard.style.borderColor = "var(--error)"; st.style.color = "var(--error)"; }
-                    else { sCard.style.borderColor = "#ffcc00"; st.style.color = "#ffcc00"; }
+                    if(status === "schváleno") { sCard.style.borderColor = "var(--success)"; document.getElementById('status-text').style.color = "var(--success)"; }
+                    else if(status === "zamítnuto") { sCard.style.borderColor = "var(--error)"; document.getElementById('status-text').style.color = "var(--error)"; }
 
                     if(d.role === "admin") document.getElementById('btn-admin').style.display = "block";
 
                     document.getElementById('btn-prihlaska').onclick = () => {
-                        if(status === "v řešení") return alert("Žádost se již zpracovává.");
-                        if(status === "schváleno") return alert("Již jsi schválen.");
+                        if(status === "v řešení") return alert("Žádost se zpracovává.");
+                        if(status === "schváleno") return alert("Už WL máš.");
                         if(att <= 0) return alert("Nemáš pokusy.");
                         location.href = 'prihlaska.html';
                     };
 
                     if(status === "zamítnuto") {
                         const h = await getDocs(query(collection(db, "history"), where("playerID", "==", user.discordId), orderBy("date", "desc"), limit(1)));
-                        if(!h.empty) {
-                            document.getElementById('reason-area').innerHTML = `<div class="reason-box"><strong>DŮVOD:</strong> ${h.docs[0].data().reason}</div>`;
-                        }
-                    } else { document.getElementById('reason-area').innerHTML = ""; }
+                        if(!h.empty) document.getElementById('reason-area').innerHTML = `<div class="reason-box"><strong>DŮVOD:</strong> ${h.docs[0].data().reason}</div>`;
+                    }
                 }
             });
         } else {
@@ -245,7 +133,7 @@
             if(code) {
                 fetch(`/api/auth?code=${code}`).then(r => r.json()).then(data => {
                     localStorage.setItem('discord_user', JSON.stringify({discordId: data.id, username: data.username, avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`}));
-                    window.location.replace("/");
+                    window.location.href = "/";
                 });
             }
         }
