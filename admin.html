@@ -18,7 +18,7 @@
     <div style="max-width:1000px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h1>🛡️ WL SPRÁVA</h1>
-            <button onclick="location.href='index.html'" style="background:#444; color:white;">ZPĚT</button>
+            <button onclick="location.href='index.html'" style="background:#444; color:white;">ZPĚT NA DASHBOARD</button>
         </div>
         <div id="list"></div>
     </div>
@@ -26,13 +26,19 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, deleteDoc, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        // Zabezpečení - pokud uživatel není vůbec přihlášený (ideálně bys zde měl kontrolovat i to, zda je admin)
+        if(!localStorage.getItem('user')) {
+            window.location.href = 'index.html';
+        }
+
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         onSnapshot(collection(db, "zadosti"), (snap) => {
             const list = document.getElementById('list');
-            list.innerHTML = snap.empty ? "<p>Žádné žádosti k vyřízení.</p>" : "";
+            list.innerHTML = snap.empty ? "<p style='text-align:center;'>Žádné aktivní žádosti k vyřízení.</p>" : "";
             snap.forEach(s => {
                 const d = s.data();
                 const div = document.createElement('div');
@@ -44,9 +50,10 @@
                     </div>
                     <div class="q-box"><strong>Lore:</strong> ${d.lore}</div>
                     <div class="q-box"><strong>FearRP:</strong> ${d.fear}</div>
+                    <div class="q-box"><strong>Metagaming:</strong> ${d.meta}</div>
                     <div class="q-box"><strong>EMS Situace:</strong> ${d.ems}</div>
                     <div class="actions">
-                        <input type="text" id="r-${s.id}" placeholder="Důvod..." style="flex-grow:1; padding:10px; background:#111; border:1px solid #444; color:white;">
+                        <input type="text" id="r-${s.id}" placeholder="Důvod zamítnutí..." style="flex-grow:1; padding:10px; background:#111; border:1px solid #444; color:white;">
                         <button style="background:green; color:white;" onclick="process('${s.id}', '${d.discordId}', 'schváleno')">SCHVÁLIT</button>
                         <button style="background:red; color:white;" onclick="process('${s.id}', '${d.discordId}', 'zamítnuto')">ZAMÍTNOUT</button>
                     </div>`;
@@ -56,18 +63,23 @@
 
         window.process = async (id, uid, status) => {
             const reason = document.getElementById(`r-${id}`).value;
-            if (status === 'zamítnuto' && !reason) return alert("Zadej důvod!");
+            if (status === 'zamítnuto' && !reason) return alert("Zadej důvod zamítnutí!");
             
             await updateDoc(doc(db, "users", uid), { wlStatus: status });
             await addDoc(collection(db, "history"), { uid, status, reason: reason || "Schváleno", date: serverTimestamp() });
             await deleteDoc(doc(db, "zadosti", id));
 
-            fetch('/api/notify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ discordId: uid, status, reason })
-            });
-            alert("Vyřízeno!");
+            // Zkusí zavolat API pro Discord bota
+            try {
+                fetch('/api/notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ discordId: uid, status, reason })
+                });
+            } catch (e) {
+                console.error("Chyba při odesílání DM:", e);
+            }
+            alert("Žádost úspěšně vyřízena!");
         };
     </script>
 </body>

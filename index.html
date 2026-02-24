@@ -21,14 +21,16 @@
         .card { background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 20px; padding: 30px; width: 260px; transition: 0.3s; cursor: pointer; border-bottom: 4px solid transparent; }
         .card:hover { border-color: var(--primary); transform: translateY(-5px); }
         .card img { width: 40px; margin-bottom: 15px; filter: invert(1); }
-        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; }
-        .logout-btn { margin-top: 40px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-family: 'Rajdhani'; }
+        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; transition: 0.3s; }
+        .btn-discord:hover { background: #4752c4; transform: scale(1.05); }
+        .logout-btn { margin-top: 40px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-family: 'Rajdhani'; transition: 0.3s; }
+        .logout-btn:hover { background: #ff2222; }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="login-screen">
-            <h1 style="font-size: 4rem; letter-spacing: 10px; color: var(--primary);">CMRP</h1>
+            <h1 style="font-size: 4rem; letter-spacing: 10px; color: var(--primary); margin-bottom: 20px;">CMRP</h1>
             <button class="btn-discord" onclick="loginWithDiscord()">PŘIHLÁSIT PŘES DISCORD</button>
         </div>
 
@@ -50,8 +52,8 @@
                 </div>
                 <div class="card" style="border-bottom-color: var(--primary);" onclick="location.href='admin.html'">
                     <img src="https://cdn-icons-png.flaticon.com/512/2206/2206248.png">
-                    <h3>Admin Panel</h3>
-                    <p>Správa žádostí</p>
+                    <h3>WL Adder</h3>
+                    <p>Administrace</p>
                 </div>
             </div>
             <button class="logout-btn" onclick="logout()">ODHLÁSIT SE</button>
@@ -66,9 +68,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // POUŽIJEME TVOJE ID Z SCREENSHOTU
-        const CLIENT_ID = '1175153869092511834'; 
-        const REDIRECT_URI = window.location.origin + '/index.html';
+        // OPRAVENÉ ID Z TVÉHO SCREENSHOTU
+        const CLIENT_ID = '1475153869092511834'; 
+        const REDIRECT_URI = window.location.origin; // Vercel doména (https://cmrp-system.vercel.app)
 
         window.loginWithDiscord = () => {
             window.location.href = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=identify`;
@@ -80,12 +82,15 @@
 
             if (accessToken) {
                 localStorage.setItem('discord_token', accessToken);
-                window.location.hash = "";
+                window.location.hash = ""; // Vyčistí URL od tokenu
                 
                 try {
                     const userRes = await fetch('https://discord.com/api/users/@me', {
                         headers: { Authorization: `Bearer ${accessToken}` }
                     });
+                    
+                    if (!userRes.ok) throw new Error("Neplatný token");
+                    
                     const userData = await userRes.json();
 
                     if (userData.id) {
@@ -93,15 +98,31 @@
                         document.getElementById('login-screen').style.display = 'none';
                         document.getElementById('dashboard-screen').style.display = 'flex';
                         document.getElementById('user-name').innerText = userData.username.toUpperCase();
-                        document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+                        
+                        // Zpracování avatara, pokud si ho uživatel na Discordu nenastavil
+                        const avatarUrl = userData.avatar 
+                            ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` 
+                            : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                        document.getElementById('user-avatar').src = avatarUrl;
 
-                        const userDoc = await getDoc(doc(db, "users", userData.id));
-                        document.getElementById('wl-status').innerText = userDoc.exists() ? userDoc.data().wlStatus.toUpperCase() : 'NONE';
+                        // Kontrola / Vytvoření uživatele ve Firebase
+                        const userRef = doc(db, "users", userData.id);
+                        const userDoc = await getDoc(userRef);
+                        
+                        if (!userDoc.exists()) {
+                            await setDoc(userRef, { wlStatus: 'none', username: userData.username });
+                            document.getElementById('wl-status').innerText = 'NONE';
+                        } else {
+                            document.getElementById('wl-status').innerText = userDoc.data().wlStatus.toUpperCase();
+                        }
                     }
                 } catch (e) {
+                    console.error(e);
                     localStorage.clear();
                     document.getElementById('login-screen').style.display = 'flex';
                 }
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
             }
         }
 
