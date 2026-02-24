@@ -13,18 +13,20 @@
             display: flex; align-items: center; justify-content: center;
         }
         .container { width: 100%; max-width: 1000px; padding: 20px; text-align: center; }
-        #login-screen { display: flex; flex-direction: column; align-items: center; }
+        #login-screen { display: none; flex-direction: column; align-items: center; }
         #dashboard-screen { display: none; flex-direction: column; align-items: center; }
         .user-info img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--primary); box-shadow: 0 0 20px var(--primary); margin-bottom: 15px; }
         .user-info h1 { font-size: 3.5rem; margin: 0 0 40px 0; letter-spacing: 5px; text-transform: uppercase; }
         .card-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 100%; }
-        .card { background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 20px; padding: 30px; width: 260px; transition: 0.3s; cursor: pointer; border-bottom: 4px solid transparent; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .card { 
+            background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 20px; padding: 30px; width: 260px; 
+            transition: 0.3s; cursor: pointer; border-bottom: 4px solid transparent;
+        }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); background: rgba(25,25,25,0.95); }
         .card img { width: 40px; margin-bottom: 15px; filter: invert(1); }
-        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; transition: 0.3s; }
+        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; transition: 0.3s; text-transform: uppercase; }
         .btn-discord:hover { background: #4752c4; transform: scale(1.05); }
-        .logout-btn { margin-top: 40px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-family: 'Rajdhani'; transition: 0.3s; }
-        .logout-btn:hover { background: #ff2222; }
+        .logout-btn { margin-top: 40px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-family: 'Rajdhani'; }
     </style>
 </head>
 <body>
@@ -43,17 +45,18 @@
                 <div class="card" style="border-bottom-color: var(--secondary);" onclick="location.href='prihlaska.html'">
                     <img src="https://cdn-icons-png.flaticon.com/512/2991/2991108.png">
                     <h3>Přihláška</h3>
-                    <p>Odeslat žádost o vstup</p>
+                    <p>Odeslat žádost o WL</p>
                 </div>
                 <div class="card" style="border-bottom-color: #ffcc00;">
                     <img src="https://cdn-icons-png.flaticon.com/512/1271/1271380.png">
                     <h3>Stav WL</h3>
-                    <span id="wl-status" style="color:#ffcc00; font-weight:bold; display:block; margin:10px 0;">NAČÍTÁNÍ...</span>
+                    <span id="wl-status" style="color:#ffcc00; font-weight:bold; display:block; margin:10px 0; font-size: 1.2rem;">NAČÍTÁNÍ...</span>
+                    <p style="font-size: 0.8rem; opacity: 0.5;">TVŮJ AKTUÁLNÍ STAV</p>
                 </div>
                 <div class="card" style="border-bottom-color: var(--primary);" onclick="location.href='admin.html'">
                     <img src="https://cdn-icons-png.flaticon.com/512/2206/2206248.png">
                     <h3>WL Adder</h3>
-                    <p>Administrace</p>
+                    <p>Administrace žádostí</p>
                 </div>
             </div>
             <button class="logout-btn" onclick="logout()">ODHLÁSIT SE</button>
@@ -68,9 +71,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // OPRAVENÉ ID Z TVÉHO SCREENSHOTU
-        const CLIENT_ID = '1475153869092511834'; 
-        const REDIRECT_URI = window.location.origin; // Vercel doména (https://cmrp-system.vercel.app)
+        const CLIENT_ID = '1475163869092511834'; 
+        const REDIRECT_URI = 'https://cmrp-system.vercel.app/';
 
         window.loginWithDiscord = () => {
             window.location.href = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=identify`;
@@ -82,15 +84,12 @@
 
             if (accessToken) {
                 localStorage.setItem('discord_token', accessToken);
-                window.location.hash = ""; // Vyčistí URL od tokenu
+                window.location.hash = "";
                 
                 try {
                     const userRes = await fetch('https://discord.com/api/users/@me', {
                         headers: { Authorization: `Bearer ${accessToken}` }
                     });
-                    
-                    if (!userRes.ok) throw new Error("Neplatný token");
-                    
                     const userData = await userRes.json();
 
                     if (userData.id) {
@@ -98,17 +97,10 @@
                         document.getElementById('login-screen').style.display = 'none';
                         document.getElementById('dashboard-screen').style.display = 'flex';
                         document.getElementById('user-name').innerText = userData.username.toUpperCase();
-                        
-                        // Zpracování avatara, pokud si ho uživatel na Discordu nenastavil
-                        const avatarUrl = userData.avatar 
-                            ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` 
-                            : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                        document.getElementById('user-avatar').src = avatarUrl;
+                        document.getElementById('user-avatar').src = userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-                        // Kontrola / Vytvoření uživatele ve Firebase
                         const userRef = doc(db, "users", userData.id);
                         const userDoc = await getDoc(userRef);
-                        
                         if (!userDoc.exists()) {
                             await setDoc(userRef, { wlStatus: 'none', username: userData.username });
                             document.getElementById('wl-status').innerText = 'NONE';
@@ -117,7 +109,6 @@
                         }
                     }
                 } catch (e) {
-                    console.error(e);
                     localStorage.clear();
                     document.getElementById('login-screen').style.display = 'flex';
                 }

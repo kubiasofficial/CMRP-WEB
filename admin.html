@@ -9,16 +9,16 @@
         :root { --primary: #bc13fe; --secondary: #00f2ff; }
         body { margin: 0; padding: 20px; font-family: 'Rajdhani', sans-serif; background: #0a0a0a; color: white; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover; }
         .card { background: rgba(20,20,20,0.95); border: 1px solid #333; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
-        .q-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 3px solid var(--secondary); }
+        .q-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 3px solid var(--secondary); }
         .actions { margin-top: 15px; display: flex; gap: 10px; }
-        button { padding: 10px; border-radius: 5px; border: none; cursor: pointer; font-family: 'Rajdhani'; font-weight: bold; }
+        button { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-family: 'Rajdhani'; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div style="max-width:1000px; margin:0 auto;">
+    <div style="max-width:1100px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h1>🛡️ WL SPRÁVA</h1>
-            <button onclick="location.href='index.html'" style="background:#444; color:white;">ZPĚT NA DASHBOARD</button>
+            <button onclick="location.href='index.html'" style="background:#444; color:white;">DASHBOARD</button>
         </div>
         <div id="list"></div>
     </div>
@@ -26,26 +26,20 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, deleteDoc, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        
-        // Zabezpečení - pokud uživatel není vůbec přihlášený (ideálně bys zde měl kontrolovat i to, zda je admin)
-        if(!localStorage.getItem('user')) {
-            window.location.href = 'index.html';
-        }
-
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         onSnapshot(collection(db, "zadosti"), (snap) => {
             const list = document.getElementById('list');
-            list.innerHTML = snap.empty ? "<p style='text-align:center;'>Žádné aktivní žádosti k vyřízení.</p>" : "";
+            list.innerHTML = snap.empty ? "<p style='text-align:center;'>Žádné aktivní žádosti.</p>" : "";
             snap.forEach(s => {
                 const d = s.data();
                 const div = document.createElement('div');
                 div.className = "card";
                 div.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <img src="${d.avatar}" style="width:40px; border-radius:50%;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <img src="${d.avatar}" style="width:45px; border-radius:50%; border: 2px solid var(--primary);">
                         <strong>${d.discordTag}</strong> | Steam: ${d.steamHex}
                     </div>
                     <div class="q-box"><strong>Lore:</strong> ${d.lore}</div>
@@ -53,9 +47,9 @@
                     <div class="q-box"><strong>Metagaming:</strong> ${d.meta}</div>
                     <div class="q-box"><strong>EMS Situace:</strong> ${d.ems}</div>
                     <div class="actions">
-                        <input type="text" id="r-${s.id}" placeholder="Důvod zamítnutí..." style="flex-grow:1; padding:10px; background:#111; border:1px solid #444; color:white;">
-                        <button style="background:green; color:white;" onclick="process('${s.id}', '${d.discordId}', 'schváleno')">SCHVÁLIT</button>
-                        <button style="background:red; color:white;" onclick="process('${s.id}', '${d.discordId}', 'zamítnuto')">ZAMÍTNOUT</button>
+                        <input type="text" id="r-${s.id}" placeholder="Důvod..." style="flex-grow:1; padding:10px; background:#111; border:1px solid #444; color:white; border-radius:5px;">
+                        <button style="background:#22ff22; color:black;" onclick="process('${s.id}', '${d.discordId}', 'schváleno')">SCHVÁLIT</button>
+                        <button style="background:#ff2222; color:white;" onclick="process('${s.id}', '${d.discordId}', 'zamítnuto')">ZAMÍTNOUT</button>
                     </div>`;
                 list.appendChild(div);
             });
@@ -69,17 +63,12 @@
             await addDoc(collection(db, "history"), { uid, status, reason: reason || "Schváleno", date: serverTimestamp() });
             await deleteDoc(doc(db, "zadosti", id));
 
-            // Zkusí zavolat API pro Discord bota
-            try {
-                fetch('/api/notify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ discordId: uid, status, reason })
-                });
-            } catch (e) {
-                console.error("Chyba při odesílání DM:", e);
-            }
-            alert("Žádost úspěšně vyřízena!");
+            fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discordId: uid, status, reason })
+            });
+            alert("Hotovo!");
         };
     </script>
 </body>

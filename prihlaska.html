@@ -9,22 +9,22 @@
         :root { --primary: #bc13fe; --secondary: #00f2ff; }
         body { 
             margin: 0; padding: 40px 20px; font-family: 'Rajdhani', sans-serif; color: white;
-            background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover;
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover;
         }
         .form-container { max-width: 800px; margin: 0 auto; background: rgba(10,10,10,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); }
         h1 { text-align: center; color: var(--primary); letter-spacing: 5px; text-transform: uppercase; }
         .input-group { margin-bottom: 25px; }
         label { display: block; color: var(--secondary); margin-bottom: 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; }
         input, textarea { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; }
-        textarea { height: 100px; resize: none; }
+        textarea { height: 120px; resize: none; }
         .submit-btn { width: 100%; padding: 18px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
-        .submit-btn:hover { background: #9c10d4; }
-        .back-link { color: gray; text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; display: inline-block; cursor: pointer; background: none; border: none; font-family: 'Rajdhani'; }
+        .submit-btn:hover { background: #9c10d4; transform: scale(1.01); }
+        .back-btn { background: none; border: none; color: gray; cursor: pointer; font-family: 'Rajdhani'; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <button class="back-link" onclick="location.href='index.html'">← ZPĚT NA DASHBOARD</button>
+        <button class="back-btn" onclick="location.href='index.html'">← ZPĚT NA DASHBOARD</button>
         <h1>NÁBOROVÝ PANEL</h1>
         <form id="wl-form">
             <div class="input-group">
@@ -34,7 +34,7 @@
             <div class="input-group">
                 <label>2. LORE POSTAVY (MIN. 100 SLOV)</label>
                 <textarea id="lore" required></textarea>
-                <div id="lore-count" style="text-align:right; font-size:0.8rem; color:gray;">Slov: 0 / 100</div>
+                <div id="lore-count" style="text-align:right; font-size:0.8rem; color: #ff4444;">Slov: 0 / 100</div>
             </div>
             <div class="input-group">
                 <label>3. CO JE TO FEAR RP?</label>
@@ -46,7 +46,7 @@
             </div>
             <div class="input-group">
                 <label>5. PO TRANSPORTU SCRIPTEM (MÍSTNÍ EMS)...</label>
-                <textarea id="ems" placeholder="Jak se postava cítí a co si pamatuje?" required></textarea>
+                <textarea id="ems" placeholder="Co se děje po probuzení v nemocnici?" required></textarea>
             </div>
             <button type="submit" class="submit-btn">ODESLAT PŘIHLÁŠKU</button>
         </form>
@@ -56,37 +56,29 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
-        // Zabezpečení
-        const userStr = localStorage.getItem('user');
-        if(!userStr) {
-            window.location.href = 'index.html';
-        }
-
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const loreInput = document.getElementById('lore');
-        loreInput.oninput = () => {
-            const count = loreInput.value.trim().split(/\s+/).filter(w => w).length;
+        const loreIn = document.getElementById('lore');
+        loreIn.oninput = () => {
+            const count = loreIn.value.trim().split(/\s+/).filter(w => w).length;
             document.getElementById('lore-count').innerText = `Slov: ${count} / 100`;
             document.getElementById('lore-count').style.color = count >= 100 ? '#22ff22' : '#ff4444';
         };
 
         document.getElementById('wl-form').onsubmit = async (e) => {
             e.preventDefault();
-            const user = JSON.parse(userStr);
-            const count = loreInput.value.trim().split(/\s+/).filter(w => w).length;
-            if(count < 100) return alert("Lore musí mít aspoň 100 slov!");
+            const user = JSON.parse(localStorage.getItem('user'));
+            if(!user) return alert("Chyba přihlášení!");
 
-            const avatarUrl = user.avatar 
-                ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` 
-                : 'https://cdn.discordapp.com/embed/avatars/0.png';
+            const count = loreIn.value.trim().split(/\s+/).filter(w => w).length;
+            if(count < 100) return alert("Lore musí mít minimálně 100 slov!");
 
             await addDoc(collection(db, "zadosti"), {
                 discordId: user.id,
                 discordTag: user.username,
-                avatar: avatarUrl,
+                avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png',
                 steamHex: document.getElementById('steamHex').value,
                 lore: document.getElementById('lore').value,
                 fear: document.getElementById('fear').value,
@@ -94,7 +86,7 @@
                 ems: document.getElementById('ems').value,
                 date: new Date()
             });
-            alert("Přihláška odeslána k vyřízení!");
+            alert("Přihláška odeslána!");
             location.href = 'index.html';
         };
     </script>
