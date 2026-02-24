@@ -8,79 +8,78 @@
     <style>
         :root { --primary: #bc13fe; --secondary: #00f2ff; }
         body { 
-            margin: 0; padding: 40px 15px; font-family: 'Rajdhani', sans-serif; color: white;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url('prihlaskapozadi.jpg') no-repeat center center fixed; 
-            background-size: cover; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            margin: 0; padding: 40px 20px; font-family: 'Rajdhani', sans-serif; color: white;
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('pozadi_nabor.jpg') no-repeat center center fixed; background-size: cover;
         }
-        .form-container { 
-            width: 100%; max-width: 850px; background: rgba(10,10,10,0.95); 
-            padding: 40px; border-radius: 30px; border: 1px solid var(--primary);
-            backdrop-filter: blur(15px); box-sizing: border-box;
-        }
-        .form-logo {
-            display: block; margin: 0 auto 15px auto; width: 100px;
-            filter: drop-shadow(0 0 10px var(--primary));
-        }
-        h1 { text-align: center; color: var(--primary); text-transform: uppercase; letter-spacing: 4px; margin-bottom: 35px; margin-top: 0; }
+        .form-container { max-width: 800px; margin: 0 auto; background: rgba(15,15,15,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); }
+        h1 { text-align: center; color: var(--primary); letter-spacing: 5px; margin-bottom: 40px; }
         .input-group { margin-bottom: 25px; }
-        label { display: block; margin-bottom: 10px; color: var(--secondary); font-weight: bold; text-transform: uppercase; line-height: 1.4; }
-        input, textarea { 
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #333; 
-            padding: 15px; border-radius: 12px; color: white; font-family: 'Rajdhani'; font-size: 1.1rem; box-sizing: border-box;
-        }
-        input:focus, textarea:focus { border-color: var(--primary); outline: none; background: rgba(255,255,255,0.1); }
-        .btn-submit { 
-            width: 100%; padding: 20px; background: var(--primary); border: none; border-radius: 12px; 
-            color: white; font-weight: bold; font-size: 1.3rem; cursor: pointer; text-transform: uppercase; transition: 0.3s;
-        }
-        .btn-submit:hover { box-shadow: 0 0 20px var(--primary); transform: scale(1.01); }
-        .btn-back { color: white; text-decoration: none; opacity: 0.6; display: inline-block; margin-bottom: 20px; font-weight: bold; }
+        label { display: block; color: var(--secondary); margin-bottom: 10px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
+        input, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #444; padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; }
+        textarea { height: 150px; resize: none; }
+        .word-count { text-align: right; font-size: 0.8rem; margin-top: 5px; color: gray; }
+        .submit-btn { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.3s; margin-top: 20px; }
+        .submit-btn:hover { background: #9c10d4; transform: scale(1.02); }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <a href="index.html" class="btn-back">← ZPĚT NA DASHBOARD</a>
-        <img src="cmrp.png" alt="Logo" class="form-logo">
-        <h1>Náborový Panel</h1>
-        
+        <a href="index.html" style="color:gray; text-decoration:none;">← ZPĚT NA DASHBOARD</a>
+        <h1>NÁBOROVÝ PANEL</h1>
         <form id="wl-form">
-            <div class="input-group"><label>1. STEAM HEX ID</label><input type="text" id="steamHex" placeholder="steam:1100001..." required></div>
-            <div class="input-group"><label>2. LORE POSTAVY (Min. 100 slov)</label><textarea id="lore" rows="8" required></textarea></div>
-            <div class="input-group"><label>3. CO JE TO FEAR RP? (Vysvětli vlastními slovy)</label><textarea id="fear" rows="3" required></textarea></div>
-            <div class="input-group"><label>4. CO JE TO METAGAMING? (Uveď příklad)</label><textarea id="meta" rows="3" required></textarea></div>
-            <div class="input-group"><label>5. PO TRANSPORTU SCRIPTEM (MÍSTNÍ EMS)... CO SI POSTAVA PAMATUJE?</label><textarea id="ems" rows="3" required></textarea></div>
-            <div class="input-group"><label>6. JAKÝM STYLEM VYPLŇUJEME KARTOTÉKU?</label><textarea id="kartoteka" rows="2" required></textarea></div>
-            <button type="submit" class="btn-submit">Odeslat žádost</button>
+            <div class="input-group">
+                <label>1. STEAM HEX ID</label>
+                <input type="text" id="steamHex" placeholder="steam:1100001..." required>
+            </div>
+            <div class="input-group">
+                <label>2. LORE POSTAVY (MIN. 100 SLOV)</label>
+                <textarea id="lore" placeholder="Příběh tvé postavy..." required></textarea>
+                <div class="word-count" id="lore-count">Slov: 0 / 100</div>
+            </div>
+            <div class="input-group">
+                <label>3. CO JE TO FEAR RP? (POPIŠTE VLASTNÍMI SLOVY)</label>
+                <textarea id="fear" required></textarea>
+            </div>
+            <div class="input-group">
+                <label>4. CO JE TO METAGAMING? (UVEĎTE I PŘÍKLAD)</label>
+                <textarea id="meta" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">ODESLAT PŘIHLÁŠKU</button>
         </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const user = JSON.parse(localStorage.getItem('discord_user'));
-        if(!user) location.href = 'index.html';
+        const loreText = document.getElementById('lore');
+        loreText.addEventListener('input', () => {
+            const words = loreText.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+            document.getElementById('lore-count').innerText = `Slov: ${words} / 100`;
+            document.getElementById('lore-count').style.color = words >= 100 ? '#22ff22' : 'gray';
+        });
 
         document.getElementById('wl-form').onsubmit = async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.disabled = true; btn.innerText = "ODESÍLÁM...";
-            try {
-                const userDoc = await getDoc(doc(db, "users", user.discordId));
-                const att = userDoc.data()?.attempts ?? 3;
-                await setDoc(doc(db, "zadosti", user.discordId), {
-                    discordId: user.discordId, discordTag: user.username, avatar: user.avatar,
-                    steamHex: document.getElementById('steamHex').value, lore: document.getElementById('lore').value,
-                    fear: document.getElementById('fear').value, meta: document.getElementById('meta').value,
-                    ems: document.getElementById('ems').value, kartoteka: document.getElementById('kartoteka').value,
-                    submittedAt: serverTimestamp()
-                });
-                await updateDoc(doc(db, "users", user.discordId), { wlStatus: "v řešení", attempts: att - 1 });
-                alert("Žádost odeslána!"); location.href = 'index.html';
-            } catch (err) { alert(err.message); btn.disabled = false; }
+            const user = JSON.parse(localStorage.getItem('user'));
+            const words = loreText.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+            if(words < 100) return alert("Lore musí mít alespoň 100 slov!");
+
+            await addDoc(collection(db, "zadosti"), {
+                discordId: user.id,
+                discordTag: user.username,
+                avatar: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`,
+                steamHex: document.getElementById('steamHex').value,
+                lore: document.getElementById('lore').value,
+                fear: document.getElementById('fear').value,
+                meta: document.getElementById('meta').value,
+                date: new Date()
+            });
+            alert("Přihláška odeslána!");
+            location.href = 'index.html';
         };
     </script>
 </body>

@@ -3,115 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMRP | Admin Panel</title>
+    <title>CMRP | Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #bc13fe; --secondary: #00f2ff; --error: #ff2222; --success: #22ff22; }
-        body { 
-            margin: 0; padding: 20px; font-family: 'Rajdhani', sans-serif; background: #0a0a0a; color: white; 
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover;
-        }
-        .admin-container { max-width: 1200px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-        .zadost-card { 
-            background: rgba(20,20,20,0.95); border: 1px solid #333; border-radius: 15px; padding: 25px; margin-bottom: 25px;
-            transition: 0.3s; backdrop-filter: blur(10px);
-        }
-        .zadost-card:hover { border-color: var(--primary); }
-        .user-info { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
-        .user-info img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--primary); }
+        :root { --primary: #bc13fe; --secondary: #00f2ff; --success: #22ff22; --error: #ff2222; }
+        body { margin: 0; padding: 20px; font-family: 'Rajdhani', sans-serif; background: #0a0a0a; color: white; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card { background: rgba(20,20,20,0.95); border: 1px solid #333; border-radius: 15px; padding: 25px; margin-bottom: 20px; }
+        .user-info { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .user-info img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--primary); }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .q-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border-left: 3px solid var(--secondary); }
-        .q-box strong { color: var(--secondary); display: block; margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; }
-        .actions { margin-top: 25px; display: flex; gap: 15px; align-items: center; }
-        .reason-input { flex-grow: 1; background: #111; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; font-family: 'Rajdhani'; }
-        button { padding: 12px 25px; border: none; border-radius: 8px; font-family: 'Rajdhani'; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn-approve { background: var(--success); color: black; }
-        .btn-reject { background: var(--error); color: white; }
-        button:hover { transform: scale(1.05); opacity: 0.9; }
+        .q-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; }
+        .q-box strong { color: var(--secondary); display: block; margin-bottom: 5px; }
+        .actions { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
+        input { background: #111; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; flex-grow: 1; font-family: 'Rajdhani'; }
+        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Rajdhani'; }
+        .btn-ok { background: var(--success); }
+        .btn-no { background: var(--error); color: white; }
     </style>
 </head>
 <body>
-
-<div class="admin-container">
-    <div class="header">
-        <h1>🛡️ CMRP | WL SPRÁVA</h1>
-        <button onclick="location.href='index.html'" style="background: #333; color: white;">Zpět na Dashboard</button>
-    </div>
-    <div id="zadosti-list">
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>🛡️ CMRP | WL SPRÁVA</h1>
+            <button onclick="location.href='index.html'" style="background:#333; color:white;">DASHBOARD</button>
         </div>
-</div>
+        <div id="list"></div>
+    </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, deleteDoc, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, deleteDoc, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // FUNKCE PRO ODESLÁNÍ DM PŘES API
-    async function sendDiscordDM(discordId, status, reason = "") {
-        try {
-            await fetch('/api/notify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ discordId, status, reason })
-            });
-        } catch (err) { console.error("Chyba DM:", err); }
-    }
-
-    onSnapshot(collection(db, "zadosti"), (snapshot) => {
-        const list = document.getElementById('zadosti-list');
-        list.innerHTML = snapshot.empty ? "<p style='text-align:center; opacity:0.5;'>Žádné aktivní žádosti k vyřízení.</p>" : "";
-        snapshot.forEach(ds => {
-            const d = ds.data();
-            const card = document.createElement('div');
-            card.className = "zadost-card";
-            card.innerHTML = `
-                <div class="user-info">
-                    <img src="${d.avatar}">
-                    <div>
-                        <strong style="font-size: 1.4rem;">${d.discordTag}</strong><br>
-                        <span style="color:var(--secondary);">Steam: ${d.steamHex}</span>
+        onSnapshot(collection(db, "zadosti"), (snap) => {
+            const div = document.getElementById('list');
+            div.innerHTML = snap.empty ? "<p>Žádné žádosti.</p>" : "";
+            snap.forEach(s => {
+                const d = s.data();
+                const item = document.createElement('div');
+                item.className = "card";
+                item.innerHTML = `
+                    <div class="user-info"><img src="${d.avatar}"><strong>${d.discordTag}</strong></div>
+                    <div class="grid">
+                        <div class="q-box"><strong>Lore</strong>${d.lore}</div>
+                        <div class="q-box"><strong>FearRP</strong>${d.fear}</div>
                     </div>
-                </div>
-                <div class="grid">
-                    <div class="q-box"><strong>Lore</strong>${d.lore}</div>
-                    <div class="q-box"><strong>Fear RP</strong>${d.fear}</div>
-                    <div class="q-box"><strong>Metagaming</strong>${d.meta}</div>
-                    <div class="q-box"><strong>EMS Situace</strong>${d.ems}</div>
-                </div>
-                <div class="actions">
-                    <input type="text" id="reason-${ds.id}" class="reason-input" placeholder="Důvod zamítnutí (volitelné u schválení)">
-                    <button class="btn-approve" onclick="processAction('${ds.id}', '${d.discordId}', 'schváleno')">Schválit</button>
-                    <button class="btn-reject" onclick="processAction('${ds.id}', '${d.discordId}', 'zamítnuto')">Zamítnout</button>
-                </div>
-            `;
-            list.appendChild(card);
-        });
-    });
-
-    window.processAction = async (docId, discordId, status) => {
-        const reason = document.getElementById(`reason-${docId}`).value;
-        if (status === 'zamítnuto' && !reason) return alert("Musíš uvést důvod zamítnutí!");
-
-        if (confirm(`Opravdu nastavit: ${status.toUpperCase()}?`)) {
-            // Update uživatele a historie v DB
-            await updateDoc(doc(db, "users", discordId), { wlStatus: status });
-            await addDoc(collection(db, "history"), {
-                playerID: discordId,
-                status: status,
-                reason: reason || "Schváleno",
-                date: serverTimestamp()
+                    <div class="actions">
+                        <input type="text" id="r-${s.id}" placeholder="Důvod zamítnutí...">
+                        <button class="btn-ok" onclick="handle('${s.id}', '${d.discordId}', 'schváleno')">SCHVÁLIT</button>
+                        <button class="btn-no" onclick="handle('${s.id}', '${d.discordId}', 'zamítnuto')">ZAMÍTNOUT</button>
+                    </div>`;
+                div.appendChild(item);
             });
+        });
+
+        window.handle = async (docId, userId, status) => {
+            const reason = document.getElementById(`r-${docId}`).value;
+            if(status === 'zamítnuto' && !reason) return alert("Napiš důvod!");
+            if(!confirm("Opravdu?")) return;
+
+            await updateDoc(doc(db, "users", userId), { wlStatus: status });
+            await addDoc(collection(db, "history"), { userId, status, reason: reason || "Schváleno", date: serverTimestamp() });
             await deleteDoc(doc(db, "zadosti", docId));
 
-            // ODESLÁNÍ DM PŘES BOTA
-            await sendDiscordDM(discordId, status, reason);
-            alert("Vyřízeno a zpráva odeslána na Discord.");
-        }
-    };
-</script>
+            // Volání API pro Discord DM
+            fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discordId: userId, status, reason })
+            });
+            alert("Hotovo!");
+        };
+    </script>
 </body>
 </html>
