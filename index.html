@@ -13,31 +13,22 @@
             display: flex; align-items: center; justify-content: center;
         }
         .container { width: 100%; max-width: 1000px; padding: 20px; text-align: center; }
-        #login-screen { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        #login-screen { display: flex; flex-direction: column; align-items: center; }
         #dashboard-screen { display: none; flex-direction: column; align-items: center; }
         .user-info img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--primary); box-shadow: 0 0 20px var(--primary); margin-bottom: 15px; }
         .user-info h1 { font-size: 3.5rem; margin: 0 0 40px 0; letter-spacing: 5px; text-transform: uppercase; }
         .card-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 100%; }
-        .card { 
-            background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 20px; padding: 30px; width: 260px; 
-            transition: 0.3s; cursor: pointer; border-bottom: 4px solid transparent;
-        }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); background: rgba(25,25,25,0.95); }
-        .card.p-card { border-bottom-color: var(--secondary); }
-        .card.s-card { border-bottom-color: #ffcc00; }
-        .card.a-card { border-bottom-color: var(--primary); }
+        .card { background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 20px; padding: 30px; width: 260px; transition: 0.3s; cursor: pointer; border-bottom: 4px solid transparent; }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
         .card img { width: 40px; margin-bottom: 15px; filter: invert(1); }
-        .card h3 { margin: 10px 0; font-size: 1.5rem; text-transform: uppercase; }
-        .status-none { color: #ffcc00; font-weight: bold; display: block; margin: 10px 0; }
-        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 1.2rem; transition: 0.3s; border: none; cursor: pointer; }
-        .btn-discord:hover { background: #4752c4; transform: scale(1.05); }
+        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; }
         .logout-btn { margin-top: 40px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-family: 'Rajdhani'; }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="login-screen">
-            <h1 style="font-size: 4rem; letter-spacing: 10px; margin-bottom: 10px;">CMRP</h1>
+            <h1 style="font-size: 4rem; letter-spacing: 10px; color: var(--primary);">CMRP</h1>
             <button class="btn-discord" onclick="loginWithDiscord()">PŘIHLÁSIT PŘES DISCORD</button>
         </div>
 
@@ -47,21 +38,20 @@
                 <h1 id="user-name"></h1>
             </div>
             <div class="card-grid">
-                <div class="card p-card" onclick="location.href='prihlaska.html'">
+                <div class="card" style="border-bottom-color: var(--secondary);" onclick="location.href='prihlaska.html'">
                     <img src="https://cdn-icons-png.flaticon.com/512/2991/2991108.png">
                     <h3>Přihláška</h3>
-                    <p>Odeslat žádost o WL</p>
+                    <p>Odeslat žádost o vstup</p>
                 </div>
-                <div class="card s-card">
+                <div class="card" style="border-bottom-color: #ffcc00;">
                     <img src="https://cdn-icons-png.flaticon.com/512/1271/1271380.png">
                     <h3>Stav WL</h3>
-                    <span id="wl-status" class="status-none">NAČÍTÁNÍ...</span>
-                    <p style="font-size: 0.7rem; color: var(--secondary);">KLIKNI PRO DETAIL</p>
+                    <span id="wl-status" style="color:#ffcc00; font-weight:bold; display:block; margin:10px 0;">NAČÍTÁNÍ...</span>
                 </div>
-                <div class="card a-card" onclick="location.href='admin.html'">
+                <div class="card" style="border-bottom-color: var(--primary);" onclick="location.href='admin.html'">
                     <img src="https://cdn-icons-png.flaticon.com/512/2206/2206248.png">
-                    <h3>WL Adder</h3>
-                    <p>Administrace</p>
+                    <h3>Admin Panel</h3>
+                    <p>Správa žádostí</p>
                 </div>
             </div>
             <button class="logout-btn" onclick="logout()">ODHLÁSIT SE</button>
@@ -76,6 +66,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // POUŽIJEME TVOJE ID Z SCREENSHOTU
         const CLIENT_ID = '1175153869092511834'; 
         const REDIRECT_URI = window.location.origin + '/index.html';
 
@@ -91,26 +82,25 @@
                 localStorage.setItem('discord_token', accessToken);
                 window.location.hash = "";
                 
-                const userRes = await fetch('https://discord.com/api/users/@me', {
-                    headers: { Authorization: `Bearer ${accessToken}` }
-                });
-                const userData = await userRes.json();
+                try {
+                    const userRes = await fetch('https://discord.com/api/users/@me', {
+                        headers: { Authorization: `Bearer ${accessToken}` }
+                    });
+                    const userData = await userRes.json();
 
-                if (userData.id) {
-                    localStorage.setItem('user', JSON.stringify(userData));
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('dashboard-screen').style.display = 'flex';
-                    document.getElementById('user-name').innerText = userData.username.toUpperCase();
-                    document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+                    if (userData.id) {
+                        localStorage.setItem('user', JSON.stringify(userData));
+                        document.getElementById('login-screen').style.display = 'none';
+                        document.getElementById('dashboard-screen').style.display = 'flex';
+                        document.getElementById('user-name').innerText = userData.username.toUpperCase();
+                        document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
 
-                    // Kontrola statusu ve Firebase
-                    const userDoc = await getDoc(doc(db, "users", userData.id));
-                    if (!userDoc.exists()) {
-                        await setDoc(doc(db, "users", userData.id), { wlStatus: 'none', username: userData.username });
-                        document.getElementById('wl-status').innerText = 'NONE';
-                    } else {
-                        document.getElementById('wl-status').innerText = userDoc.data().wlStatus.toUpperCase();
+                        const userDoc = await getDoc(doc(db, "users", userData.id));
+                        document.getElementById('wl-status').innerText = userDoc.exists() ? userDoc.data().wlStatus.toUpperCase() : 'NONE';
                     }
+                } catch (e) {
+                    localStorage.clear();
+                    document.getElementById('login-screen').style.display = 'flex';
                 }
             }
         }

@@ -6,27 +6,19 @@
     <title>CMRP | Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #bc13fe; --secondary: #00f2ff; --success: #22ff22; --error: #ff2222; }
+        :root { --primary: #bc13fe; --secondary: #00f2ff; }
         body { margin: 0; padding: 20px; font-family: 'Rajdhani', sans-serif; background: #0a0a0a; color: white; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .card { background: rgba(20,20,20,0.95); border: 1px solid #333; border-radius: 15px; padding: 25px; margin-bottom: 20px; }
-        .user-info { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .user-info img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--primary); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .q-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; }
-        .q-box strong { color: var(--secondary); display: block; margin-bottom: 5px; }
-        .actions { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
-        input { background: #111; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; flex-grow: 1; font-family: 'Rajdhani'; }
-        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Rajdhani'; }
-        .btn-ok { background: var(--success); }
-        .btn-no { background: var(--error); color: white; }
+        .card { background: rgba(20,20,20,0.95); border: 1px solid #333; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        .q-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 3px solid var(--secondary); }
+        .actions { margin-top: 15px; display: flex; gap: 10px; }
+        button { padding: 10px; border-radius: 5px; border: none; cursor: pointer; font-family: 'Rajdhani'; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div style="max-width:1000px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h1>🛡️ CMRP | WL SPRÁVA</h1>
-            <button onclick="location.href='index.html'" style="background:#333; color:white;">DASHBOARD</button>
+            <h1>🛡️ WL SPRÁVA</h1>
+            <button onclick="location.href='index.html'" style="background:#444; color:white;">ZPĚT</button>
         </div>
         <div id="list"></div>
     </div>
@@ -39,43 +31,43 @@
         const db = getFirestore(app);
 
         onSnapshot(collection(db, "zadosti"), (snap) => {
-            const div = document.getElementById('list');
-            div.innerHTML = snap.empty ? "<p>Žádné žádosti.</p>" : "";
+            const list = document.getElementById('list');
+            list.innerHTML = snap.empty ? "<p>Žádné žádosti k vyřízení.</p>" : "";
             snap.forEach(s => {
                 const d = s.data();
-                const item = document.createElement('div');
-                item.className = "card";
-                item.innerHTML = `
-                    <div class="user-info"><img src="${d.avatar}"><strong>${d.discordTag}</strong></div>
-                    <div class="grid">
-                        <div class="q-box"><strong>Lore</strong>${d.lore}</div>
-                        <div class="q-box"><strong>FearRP</strong>${d.fear}</div>
+                const div = document.createElement('div');
+                div.className = "card";
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="${d.avatar}" style="width:40px; border-radius:50%;">
+                        <strong>${d.discordTag}</strong> | Steam: ${d.steamHex}
                     </div>
+                    <div class="q-box"><strong>Lore:</strong> ${d.lore}</div>
+                    <div class="q-box"><strong>FearRP:</strong> ${d.fear}</div>
+                    <div class="q-box"><strong>EMS Situace:</strong> ${d.ems}</div>
                     <div class="actions">
-                        <input type="text" id="r-${s.id}" placeholder="Důvod zamítnutí...">
-                        <button class="btn-ok" onclick="handle('${s.id}', '${d.discordId}', 'schváleno')">SCHVÁLIT</button>
-                        <button class="btn-no" onclick="handle('${s.id}', '${d.discordId}', 'zamítnuto')">ZAMÍTNOUT</button>
+                        <input type="text" id="r-${s.id}" placeholder="Důvod..." style="flex-grow:1; padding:10px; background:#111; border:1px solid #444; color:white;">
+                        <button style="background:green; color:white;" onclick="process('${s.id}', '${d.discordId}', 'schváleno')">SCHVÁLIT</button>
+                        <button style="background:red; color:white;" onclick="process('${s.id}', '${d.discordId}', 'zamítnuto')">ZAMÍTNOUT</button>
                     </div>`;
-                div.appendChild(item);
+                list.appendChild(div);
             });
         });
 
-        window.handle = async (docId, userId, status) => {
-            const reason = document.getElementById(`r-${docId}`).value;
-            if(status === 'zamítnuto' && !reason) return alert("Napiš důvod!");
-            if(!confirm("Opravdu?")) return;
+        window.process = async (id, uid, status) => {
+            const reason = document.getElementById(`r-${id}`).value;
+            if (status === 'zamítnuto' && !reason) return alert("Zadej důvod!");
+            
+            await updateDoc(doc(db, "users", uid), { wlStatus: status });
+            await addDoc(collection(db, "history"), { uid, status, reason: reason || "Schváleno", date: serverTimestamp() });
+            await deleteDoc(doc(db, "zadosti", id));
 
-            await updateDoc(doc(db, "users", userId), { wlStatus: status });
-            await addDoc(collection(db, "history"), { userId, status, reason: reason || "Schváleno", date: serverTimestamp() });
-            await deleteDoc(doc(db, "zadosti", docId));
-
-            // Volání API pro Discord DM
             fetch('/api/notify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ discordId: userId, status, reason })
+                body: JSON.stringify({ discordId: uid, status, reason })
             });
-            alert("Hotovo!");
+            alert("Vyřízeno!");
         };
     </script>
 </body>

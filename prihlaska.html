@@ -9,22 +9,21 @@
         :root { --primary: #bc13fe; --secondary: #00f2ff; }
         body { 
             margin: 0; padding: 40px 20px; font-family: 'Rajdhani', sans-serif; color: white;
-            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('pozadi_nabor.jpg') no-repeat center center fixed; background-size: cover;
+            background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.95)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover;
         }
-        .form-container { max-width: 800px; margin: 0 auto; background: rgba(10,10,10,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); box-shadow: 0 0 30px rgba(188, 19, 254, 0.2); }
-        h1 { text-align: center; color: var(--primary); letter-spacing: 5px; margin-bottom: 40px; text-transform: uppercase; }
+        .form-container { max-width: 800px; margin: 0 auto; background: rgba(10,10,10,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); }
+        h1 { text-align: center; color: var(--primary); letter-spacing: 5px; text-transform: uppercase; }
         .input-group { margin-bottom: 25px; }
-        label { display: block; color: var(--secondary); margin-bottom: 10px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
-        input, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #333; padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani'; font-size: 1rem; }
-        textarea { height: 120px; resize: none; }
-        .word-count { text-align: right; font-size: 0.8rem; margin-top: 5px; color: #888; }
-        .submit-btn { width: 100%; padding: 18px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.2rem; transition: 0.3s; margin-top: 20px; }
-        .submit-btn:hover { background: #9c10d4; transform: translateY(-2px); }
+        label { display: block; color: var(--secondary); margin-bottom: 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; }
+        input, textarea { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; }
+        textarea { height: 100px; resize: none; }
+        .submit-btn { width: 100%; padding: 18px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
+        .back-link { color: gray; text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; display: inline-block; }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <button onclick="location.href='index.html'" style="background:none; border:none; color:gray; cursor:pointer; font-family:'Rajdhani';">← ZPĚT NA DASHBOARD</button>
+        <a href="index.html" class="back-link">← ZPĚT NA DASHBOARD</a>
         <h1>NÁBOROVÝ PANEL</h1>
         <form id="wl-form">
             <div class="input-group">
@@ -33,8 +32,8 @@
             </div>
             <div class="input-group">
                 <label>2. LORE POSTAVY (MIN. 100 SLOV)</label>
-                <textarea id="lore" placeholder="Vypiš příběh své postavy..." required></textarea>
-                <div class="word-count" id="lore-count">Slov: 0 / 100</div>
+                <textarea id="lore" required></textarea>
+                <div id="lore-count" style="text-align:right; font-size:0.8rem; color:gray;">Slov: 0 / 100</div>
             </div>
             <div class="input-group">
                 <label>3. CO JE TO FEAR RP?</label>
@@ -43,6 +42,10 @@
             <div class="input-group">
                 <label>4. CO JE TO METAGAMING?</label>
                 <textarea id="meta" required></textarea>
+            </div>
+            <div class="input-group">
+                <label>5. PO TRANSPORTU SCRIPTEM (MÍSTNÍ EMS)...</label>
+                <textarea id="ems" placeholder="Jak se postava cítí a co si pamatuje?" required></textarea>
             </div>
             <button type="submit" class="submit-btn">ODESLAT PŘIHLÁŠKU</button>
         </form>
@@ -55,19 +58,18 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const loreText = document.getElementById('lore');
-        loreText.addEventListener('input', () => {
-            const words = loreText.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-            document.getElementById('lore-count').innerText = `Slov: ${words} / 100`;
-            document.getElementById('lore-count').style.color = words >= 100 ? '#22ff22' : '#ff4444';
-        });
+        const loreInput = document.getElementById('lore');
+        loreInput.oninput = () => {
+            const count = loreInput.value.trim().split(/\s+/).filter(w => w).length;
+            document.getElementById('lore-count').innerText = `Slov: ${count} / 100`;
+            document.getElementById('lore-count').style.color = count >= 100 ? '#22ff22' : '#ff4444';
+        };
 
         document.getElementById('wl-form').onsubmit = async (e) => {
             e.preventDefault();
             const user = JSON.parse(localStorage.getItem('user'));
-            const words = loreText.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-            
-            if(words < 100) return alert("Tvůj příběh (Lore) musí mít aspoň 100 slov!");
+            const count = loreInput.value.trim().split(/\s+/).filter(w => w).length;
+            if(count < 100) return alert("Lore musí mít aspoň 100 slov!");
 
             await addDoc(collection(db, "zadosti"), {
                 discordId: user.id,
@@ -77,9 +79,10 @@
                 lore: document.getElementById('lore').value,
                 fear: document.getElementById('fear').value,
                 meta: document.getElementById('meta').value,
+                ems: document.getElementById('ems').value,
                 date: new Date()
             });
-            alert("Přihláška byla úspěšně odeslána k vyřízení!");
+            alert("Odesláno!");
             location.href = 'index.html';
         };
     </script>
