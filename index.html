@@ -6,67 +6,184 @@
     <title>Community Roleplay | Systém</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #bc13fe; --secondary: #00f2ff; --error: #ff2222; --success: #22ff22; }
-        body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; color: white; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://i.imgur.com/your-background-image.jpg') no-repeat center center fixed; background-size: cover; display: flex; align-items: center; justify-content: center; }
-        
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        :root { 
+            --primary: #bc13fe; 
+            --secondary: #00f2ff; 
+            --error: #ff2222; 
+            --success: #22ff22;
+            --bg-dark: #0a0a0a;
+        }
+
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            min-height: 100vh; 
+            font-family: 'Rajdhani', sans-serif; 
+            color: white; 
+            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* Video nebo obrázek na pozadí */
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9));
+            z-index: -1;
+        }
+
+        #login-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg-dark); z-index: 999; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
         .logged-in #login-overlay { display: none; }
 
-        .card-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-        .card { background: rgba(10,10,10,0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px; width: 220px; text-align: center; transition: 0.3s; cursor: pointer; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 0 20px rgba(188, 19, 254, 0.2); }
+        .main-container {
+            max-width: 1000px;
+            width: 90%;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        #user-avatar { 
+            width: 120px; height: 120px;
+            border-radius: 50%; 
+            border: 4px solid var(--primary); 
+            margin-bottom: 10px;
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
+        }
+
+        #user-name { 
+            color: var(--primary); 
+            font-size: 3.5rem; 
+            margin: 0 0 40px 0; 
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 15px rgba(188, 19, 254, 0.6);
+        }
+
+        .card-container { 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .card { 
+            background: rgba(20, 20, 20, 0.8); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 20px; 
+            padding: 40px 20px; 
+            text-align: center; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover { 
+            border-color: var(--primary); 
+            transform: translateY(-10px);
+            background: rgba(30, 30, 30, 0.9);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        .card i { font-size: 3rem; margin-bottom: 15px; display: block; }
+
         .status-card { border-bottom: 4px solid #ffcc00; cursor: default; }
 
-        #user-avatar { width: 100px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 15px; box-shadow: 0 0 15px var(--primary); }
-        .reason-box { background: rgba(255, 34, 34, 0.1); border: 1px solid var(--error); border-radius: 10px; padding: 10px; margin-top: 15px; font-size: 0.9rem; color: #ffbaba; text-align: left; }
+        .reason-box { 
+            background: rgba(255, 34, 34, 0.1); 
+            border-left: 3px solid var(--error); 
+            border-radius: 5px; 
+            padding: 10px; 
+            margin-top: 15px; 
+            font-size: 0.85rem; 
+            color: #ffbaba;
+            text-align: left;
+        }
         
-        .logout-btn { margin-top: 40px; background: none; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: 'Rajdhani'; transition: 0.3s; }
-        .logout-btn:hover { background: var(--error); border-color: var(--error); opacity: 1; }
+        /* Tlačítka */
+        .logout-btn { 
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Rajdhani';
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        .logout-btn:hover { 
+            background: var(--error); 
+            border-color: var(--error);
+            box-shadow: 0 0 15px rgba(255, 34, 34, 0.4);
+        }
 
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn-discord {
+            background: #5865F2;
+            color: white;
+            padding: 18px 45px;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            display: inline-block;
+        }
+        .btn-discord:hover { background: #4752c4; transform: scale(1.05); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Responzivita pro mobily */
+        @media (max-width: 600px) {
+            #user-name { font-size: 2.2rem; }
+            .card-container { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
+    <div class="bg-overlay"></div>
+
     <div id="login-overlay">
-        <div id="login-content" style="text-align: center;">
-            <h1 style="color: var(--primary); font-size: 3rem; margin-bottom: 10px;">CMRP</h1>
-            <p style="margin-bottom: 30px; opacity: 0.7;">Vítejte v náborovém systému</p>
-            <a id="login-link" href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email" 
-               style="background:#5865F2; color:white; padding:15px 40px; text-decoration:none; border-radius:10px; font-weight:bold; text-transform: uppercase; letter-spacing: 1px;">
-               Přihlásit přes Discord
-            </a>
-        </div>
-        <div id="loading-spinner" style="display: none; flex-direction: column; align-items: center;">
-            <div class="loader"></div>
-            <p>Ověřování identity...</p>
-        </div>
+        <h1 style="color: var(--primary); font-size: 4rem; margin-bottom: 5px;">CMRP</h1>
+        <p style="opacity: 0.6; margin-bottom: 40px; letter-spacing: 2px;">NÁBOROVÝ SYSTÉM</p>
+        <a class="btn-discord" href="https://discord.com/oauth2/authorize?client_id=1475163869092511834&response_type=code&redirect_uri=https%3A%2F%2Fcmrp-system.vercel.app%2F&scope=identify+email">
+            VSTOUPIT PŘES DISCORD
+        </a>
     </div>
 
-    <div id="main-ui" style="display:none; text-align:center;">
+    <div id="main-ui" class="main-container" style="display:none;">
         <img id="user-avatar" src="">
-        <h1 id="user-name" style="color:var(--primary); font-size:3rem; margin:0 0 30px 0; text-transform: uppercase;">HRÁČ</h1>
+        <h1 id="user-name">HRÁČ</h1>
 
         <div class="card-container">
-            <div class="card" id="btn-prihlaska">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">📄</div>
-                <h3>PŘIHLÁŠKA</h3>
-                <p style="font-size: 0.8rem; opacity: 0.6;">Odeslat novou žádost</p>
+            <div class="card" id="btn-prihlaska" style="border-bottom: 4px solid var(--secondary);">
+                <span style="font-size: 3rem;">📄</span>
+                <h3 style="margin: 10px 0;">PŘIHLÁŠKA</h3>
+                <p style="font-size: 0.8rem; opacity: 0.5;">Podat žádost o vstup</p>
             </div>
 
             <div class="card status-card" id="status-card">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">🛡️</div>
-                <h3>STAV WL</h3>
-                <div id="status-text" style="font-weight:bold; color:#ffcc00; font-size: 1.2rem; text-transform: uppercase;">NAČÍTÁNÍ...</div>
-                <div id="attempts-text" style="font-size:0.9rem; opacity:0.8; margin-top: 5px;">Pokusy: -/-</div>
+                <span style="font-size: 3rem;">🛡️</span>
+                <h3 style="margin: 10px 0;">STAV WL</h3>
+                <div id="status-text" style="font-weight:bold; color:#ffcc00; font-size: 1.4rem;">NAČÍTÁNÍ...</div>
+                <div id="attempts-text" style="font-size:0.8rem; opacity:0.6; margin-top: 5px;">Pokusy: -/-</div>
                 <div id="reason-area"></div>
             </div>
 
             <div id="btn-admin" class="card" style="display:none; border-bottom:4px solid var(--primary)" onclick="location.href='admin.html'">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">👔</div>
-                <h3>WL ADDER</h3>
-                <p style="font-size: 0.8rem; opacity: 0.6;">Administrace</p>
+                <span style="font-size: 3rem;">👔</span>
+                <h3 style="margin: 10px 0;">WL ADDER</h3>
+                <p style="font-size: 0.8rem; opacity: 0.5;">Správa systému</p>
             </div>
         </div>
 
@@ -81,36 +198,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.logout = () => { localStorage.clear(); window.location.href = window.location.origin; };
+        window.logout = () => { localStorage.clear(); window.location.reload(); };
 
-        // 1. ZPRACOVÁNÍ NÁVRATU Z DISCORDU
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-
-        if (code) {
-            document.getElementById('login-content').style.display = 'none';
-            document.getElementById('loading-spinner').style.display = 'flex';
-
-            fetch(`/api/auth?code=${code}`)
-                .then(res => res.json())
-                .then(data => {
-                    const userData = {
-                        discordId: data.id,
-                        username: data.username,
-                        avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
-                    };
-                    localStorage.setItem('discord_user', JSON.stringify(userData));
-                    // Vyčištění URL a reload
-                    window.location.href = window.location.origin;
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Chyba při přihlašování. Zkuste to znovu.");
-                    window.location.href = window.location.origin;
-                });
-        }
-
-        // 2. LOGIKA PRO PŘIHLÁŠENÉHO UŽIVATELE
         const savedUser = localStorage.getItem('discord_user');
         if (savedUser) {
             const user = JSON.parse(savedUser);
@@ -119,48 +208,46 @@
             document.getElementById('user-name').innerText = user.username;
             document.getElementById('user-avatar').src = user.avatar;
 
-            // Real-time sledování dat uživatele ve Firebase
             onSnapshot(doc(db, "users", user.discordId), async (ds) => {
                 if (ds.exists()) {
-                    const data = ds.data();
-                    const status = data.wlStatus || "none";
-                    const attempts = data.attempts ?? 3;
+                    const d = ds.data();
+                    const status = d.wlStatus || "none";
+                    const att = d.attempts ?? 3;
                     
-                    document.getElementById('status-text').innerText = status;
-                    document.getElementById('attempts-text').innerText = `Zbývající pokusy: ${attempts}/3`;
+                    const st = document.getElementById('status-text');
+                    st.innerText = status.toUpperCase();
+                    document.getElementById('attempts-text').innerText = `ZBÝVAJÍCÍ POKUSY: ${att}/3`;
                     
                     const sCard = document.getElementById('status-card');
-                    if(status === "schváleno") { sCard.style.borderColor = "var(--success)"; document.getElementById('status-text').style.color = "var(--success)"; }
-                    else if(status === "zamítnuto") { sCard.style.borderColor = "var(--error)"; document.getElementById('status-text').style.color = "var(--error)"; }
-                    else { sCard.style.borderColor = "#ffcc00"; document.getElementById('status-text').style.color = "#ffcc00"; }
+                    if(status === "schváleno") { sCard.style.borderColor = "var(--success)"; st.style.color = "var(--success)"; }
+                    else if(status === "zamítnuto") { sCard.style.borderColor = "var(--error)"; st.style.color = "var(--error)"; }
+                    else { sCard.style.borderColor = "#ffcc00"; st.style.color = "#ffcc00"; }
 
-                    // Tlačítko WL ADDER (vždy viditelné pro Adminy)
-                    if(data.role === "admin") {
-                        document.getElementById('btn-admin').style.display = "block";
-                    }
+                    if(d.role === "admin") document.getElementById('btn-admin').style.display = "block";
 
-                    // Logika tlačítka PŘIHLÁŠKA
                     document.getElementById('btn-prihlaska').onclick = () => {
-                        if(status === "v řešení") return alert("Tvoje žádost se právě posuzuje.");
-                        if(status === "schváleno") return alert("Už jsi členem WhiteListu!");
-                        if(attempts <= 0) return alert("Už nemáš žádné další pokusy.");
+                        if(status === "v řešení") return alert("Žádost se již zpracovává.");
+                        if(status === "schváleno") return alert("Již jsi schválen.");
+                        if(att <= 0) return alert("Nemáš pokusy.");
                         location.href = 'prihlaska.html';
                     };
 
-                    // Zobrazení důvodu zamítnutí
                     if(status === "zamítnuto") {
-                        const hQuery = query(collection(db, "history"), where("playerID", "==", user.discordId), orderBy("date", "desc"), limit(1));
-                        const hSnap = await getDocs(hQuery);
-                        if(!hSnap.empty) {
-                            const hData = hSnap.docs[0].data();
-                            document.getElementById('reason-area').innerHTML = `
-                                <div class="reason-box">
-                                    <strong style="color:white">DŮVOD ZAMÍTNUTÍ:</strong><br>${hData.reason || "Neuveden"}
-                                </div>`;
+                        const h = await getDocs(query(collection(db, "history"), where("playerID", "==", user.discordId), orderBy("date", "desc"), limit(1)));
+                        if(!h.empty) {
+                            document.getElementById('reason-area').innerHTML = `<div class="reason-box"><strong>DŮVOD:</strong> ${h.docs[0].data().reason}</div>`;
                         }
                     } else { document.getElementById('reason-area').innerHTML = ""; }
                 }
             });
+        } else {
+            const code = new URLSearchParams(window.location.search).get('code');
+            if(code) {
+                fetch(`/api/auth?code=${code}`).then(r => r.json()).then(data => {
+                    localStorage.setItem('discord_user', JSON.stringify({discordId: data.id, username: data.username, avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`}));
+                    window.location.replace("/");
+                });
+            }
         }
     </script>
 </body>
