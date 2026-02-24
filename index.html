@@ -11,7 +11,7 @@
         body, html { 
             margin: 0; padding: 0; min-height: 100vh; 
             font-family: 'Rajdhani', sans-serif; color: white;
-            /* TVÉ POZADÍ */
+            /* Ujisti se, že máš tento obrázek ve složce */
             background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), 
                         url('pozadicko.jpg') no-repeat center center fixed; 
             background-size: cover;
@@ -19,14 +19,9 @@
             overflow-x: hidden;
         }
 
-        /* Oprava ořezu - kontejner přes celou šířku */
         .dashboard-wrapper {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
+            width: 100%; display: flex; flex-direction: column;
+            align-items: center; padding: 20px; box-sizing: border-box;
         }
 
         #login-overlay { 
@@ -54,12 +49,13 @@
         .card { 
             background: rgba(10, 10, 10, 0.8); border: 1px solid rgba(255,255,255,0.1); 
             border-radius: 20px; padding: 40px 20px; width: 300px; text-align: center;
-            transition: 0.3s; cursor: pointer; backdrop-filter: blur(10px);
+            transition: 0.3s; cursor: pointer; backdrop-filter: blur(10px); position: relative;
         }
-        .card:hover { border-color: var(--primary); transform: translateY(-10px); background: rgba(20, 20, 20, 0.9); }
+        .card:hover { border-color: var(--primary); transform: translateY(-10px); background: rgba(20, 20, 20, 0.9); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        .status-card { border-bottom: 6px solid #ffcc00; cursor: default; }
-        .reason-box { background: rgba(255, 34, 34, 0.15); border-left: 4px solid var(--error); padding: 12px; margin-top: 15px; text-align: left; font-size: 0.9rem; }
+        /* Nový styl pro Status kartu */
+        .status-card { border-bottom: 6px solid #ffcc00; }
+        .card-action-text { font-size: 1rem; font-weight: bold; color: var(--secondary); margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; }
 
         .logout-btn { 
             margin-top: 40px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
@@ -67,9 +63,47 @@
             text-transform: uppercase; transition: 0.3s;
         }
         .logout-btn:hover { background: var(--error); border-color: var(--error); }
-
         .btn-discord { background: #5865F2; color: white; padding: 18px 40px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 1.2rem; transition: 0.3s; }
         .btn-discord:hover { background: #4752c4; transform: scale(1.05); }
+
+        /* --- NOVÉ STYLY PRO MODÁLNÍ OKNO --- */
+        .modal {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto;
+            background-color: rgba(0,0,0,0.9); backdrop-filter: blur(15px);
+            align-items: center; justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-content {
+            background: rgba(15, 15, 15, 0.95); border: 2px solid var(--primary);
+            margin: auto; padding: 40px; border-radius: 25px;
+            width: 90%; max-width: 600px; position: relative;
+            box-shadow: 0 0 50px rgba(188, 19, 254, 0.3);
+            text-align: left;
+        }
+        .close-modal {
+            color: #aaa; float: right; font-size: 2rem; font-weight: bold;
+            position: absolute; top: 15px; right: 25px; cursor: pointer; transition: 0.3s;
+        }
+        .close-modal:hover { color: var(--primary); }
+
+        .modal-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--secondary); padding-bottom: 20px; }
+        .modal-header h2 { margin: 0; font-size: 2.5rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 3px; }
+
+        .detail-row { margin-bottom: 25px; }
+        .detail-label { display: block; font-size: 0.9rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 8px; font-weight: bold; letter-spacing: 1px; }
+        .detail-value { font-size: 1.3rem; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .status-pending { color: #ffcc00; }
+        .status-success { color: var(--success); }
+        .status-error { color: var(--error); }
+
+        .message-box { padding: 20px; border-radius: 10px; background: rgba(255,255,255,0.03); border-left: 5px solid rgba(255,255,255,0.3); }
+        .msg-reject { background: rgba(255, 34, 34, 0.1); border-left-color: var(--error); color: #ffbaba; }
+        .msg-approve { background: rgba(34, 255, 34, 0.1); border-left-color: var(--success); color: #c7ffc7; }
+
     </style>
 </head>
 <body>
@@ -95,12 +129,10 @@
                 <p>Odeslat žádost o vstup</p>
             </div>
 
-            <div class="card status-card" id="status-card">
+            <div class="card status-card" id="status-card" onclick="openModal()">
                 <span style="font-size: 3rem;">🛡️</span>
                 <h3>STAV WL</h3>
-                <div id="status-text" style="font-weight:bold; color:#ffcc00; font-size: 1.5rem;">NAČÍTÁNÍ...</div>
-                <div id="attempts-text" style="font-size:0.8rem; opacity:0.6; margin-top: 5px;">Pokusy: -/-</div>
-                <div id="reason-area"></div>
+                <div class="card-action-text">KLIKNI PRO DETAIL PROFILU</div>
             </div>
 
             <div id="btn-admin" class="card" style="display:none; border-bottom: 6px solid var(--primary);" onclick="location.href='admin.html'">
@@ -113,6 +145,17 @@
         <button class="logout-btn" onclick="logout()">ODHLÁSIT SE</button>
     </div>
 
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2>Detail Profilu</h2>
+            </div>
+            <div id="modal-body-content">
+                </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, onSnapshot, getDocs, query, collection, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -123,70 +166,120 @@
 
         window.logout = () => { localStorage.clear(); window.location.href = window.location.origin; };
 
+        // --- Globální proměnné pro uložení dat pro modální okno ---
+        let currentUserData = null;
+        let latestReason = null;
+        let currentDiscordId = null;
+
+        // --- Funkce pro Modální okno ---
+        window.openModal = () => {
+            if (!currentUserData) return;
+            
+            const modal = document.getElementById('profile-modal');
+            const content = document.getElementById('modal-body-content');
+            
+            // 1. Zpracování statusu pro zobrazení
+            let statusDisplay = '<span class="status-pending">Žádná žádost</span>';
+            let messageDisplay = '<div class="message-box">Žádné nové zprávy.</div>';
+
+            if (currentUserData.wlStatus === 'v řešení') {
+                statusDisplay = '<span class="status-pending">Čeká na vyhodnocení</span>';
+                messageDisplay = '<div class="message-box" style="border-color:#ffcc00">Tvá žádost byla odeslána a čeká na kontrolu admin týmem.</div>';
+            } else if (currentUserData.wlStatus === 'schváleno') {
+                statusDisplay = '<span class="status-success">PŘIJAT(A)</span>';
+                messageDisplay = '<div class="message-box msg-approve">🎉 Gratulujeme! Tvá žádost byla schválena. Vítej na serveru!</div>';
+            } else if (currentUserData.wlStatus === 'zamítnuto') {
+                statusDisplay = '<span class="status-error">NEPŘIJAT(A)</span>';
+                messageDisplay = `<div class="message-box msg-reject"><strong>DŮVOD ZAMÍTNUTÍ:</strong><br>${latestReason || "Důvod neuveden."}</div>`;
+            }
+
+            // 2. Vložení HTML do modálního okna
+            content.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Discord ID</span>
+                    <div class="detail-value" style="font-family: monospace;">${currentDiscordId}</div>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Zbývající pokusy</span>
+                    <div class="detail-value">${currentUserData.attempts ?? 3} / 3</div>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Stav poslední žádosti</span>
+                    <div class="detail-value">${statusDisplay}</div>
+                </div>
+                <div class="detail-row" style="margin-top: 30px;">
+                    <span class="detail-label">Příchozí zprávy</span>
+                    ${messageDisplay}
+                </div>
+            `;
+
+            modal.style.display = "flex";
+        };
+
+        window.closeModal = () => {
+            document.getElementById('profile-modal').style.display = "none";
+        };
+
+        // Kliknutí mimo okno ho zavře
+        window.onclick = (event) => {
+            const modal = document.getElementById('profile-modal');
+            if (event.target == modal) closeModal();
+        }
+
+
+        // --- Hlavní logika přihlášení a načítání dat ---
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
 
-        // Pokud se vracíme z Discordu (máme kód v URL)
         if (code) {
             document.getElementById('login-actions').style.display = 'none';
             document.getElementById('loading-msg').style.display = 'block';
-
-            fetch(`/api/auth?code=${code}`)
-                .then(res => res.json())
-                .then(data => {
-                    const userData = {
-                        discordId: data.id,
-                        username: data.username,
-                        avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
-                    };
-                    localStorage.setItem('discord_user', JSON.stringify(userData));
-                    // Vyčistíme URL od kódu a reloadneme pro zobrazení dashboardu
-                    window.location.href = window.location.origin;
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Chyba přihlášení.");
-                    window.location.href = window.location.origin;
-                });
+            fetch(`/api/auth?code=${code}`).then(res => res.json()).then(data => {
+                localStorage.setItem('discord_user', JSON.stringify({discordId: data.id, username: data.username, avatar: `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`}));
+                window.location.href = window.location.origin;
+            }).catch(err => { console.error(err); alert("Chyba přihlášení."); window.location.href = window.location.origin; });
         }
 
-        // Kontrola přihlášení
         const savedUser = localStorage.getItem('discord_user');
         if (savedUser) {
             const user = JSON.parse(savedUser);
+            currentDiscordId = user.discordId; // Uložení ID pro modal
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('main-ui').style.display = 'flex';
             document.getElementById('user-name').innerText = user.username;
             document.getElementById('user-avatar').src = user.avatar;
 
-            // Sledování změn ve Firebase
+            // Real-time sledování dat
             onSnapshot(doc(db, "users", user.discordId), async (ds) => {
                 if (ds.exists()) {
-                    const d = ds.data();
-                    const status = d.wlStatus || "none";
-                    const att = d.attempts ?? 3;
+                    currentUserData = ds.data(); // Uložení dat pro modal
+                    const status = currentUserData.wlStatus || "none";
+                    const att = currentUserData.attempts ?? 3;
                     
-                    const st = document.getElementById('status-text');
-                    st.innerText = status.toUpperCase();
-                    document.getElementById('attempts-text').innerText = `ZBÝVAJÍCÍ POKUSY: ${att}/3`;
-                    
+                    // Aktualizace barvy karty (text už na ní není)
                     const sCard = document.getElementById('status-card');
-                    if(status === "schváleno") { sCard.style.borderColor = "var(--success)"; st.style.color = "var(--success)"; }
-                    else if(status === "zamítnuto") { sCard.style.borderColor = "var(--error)"; st.style.color = "var(--error)"; }
+                    if(status === "schváleno") sCard.style.borderColor = "var(--success)";
+                    else if(status === "zamítnuto") sCard.style.borderColor = "var(--error)";
+                    else sCard.style.borderColor = "#ffcc00";
 
-                    if(d.role === "admin") document.getElementById('btn-admin').style.display = "block";
+                    // Zobrazení Admin tlačítka
+                    if(currentUserData.role === "admin") document.getElementById('btn-admin').style.display = "block";
 
+                    // Logika tlačítka Přihláška
                     document.getElementById('btn-prihlaska').onclick = () => {
-                        if(status === "v řešení") return alert("Žádost se zpracovává.");
-                        if(status === "schváleno") return alert("Už WL máš.");
-                        if(att <= 0) return alert("Nemáš pokusy.");
+                        if(status === "v řešení") return alert("Tvá žádost se již zpracovává.");
+                        if(status === "schváleno") return alert("Již jsi členem WhiteListu.");
+                        if(att <= 0) return alert("Bohužel již nemáš žádné pokusy.");
                         location.href = 'prihlaska.html';
                     };
 
+                    // Načtení důvodu, pokud je zamítnuto (pro modal)
                     if(status === "zamítnuto") {
                         const h = await getDocs(query(collection(db, "history"), where("playerID", "==", user.discordId), orderBy("date", "desc"), limit(1)));
-                        if(!h.empty) document.getElementById('reason-area').innerHTML = `<div class="reason-box"><strong>DŮVOD:</strong> ${h.docs[0].data().reason}</div>`;
-                    } else { document.getElementById('reason-area').innerHTML = ""; }
+                        if(!h.empty) latestReason = h.docs[0].data().reason;
+                    } else {
+                        latestReason = null;
+                    }
                 }
             });
         }
