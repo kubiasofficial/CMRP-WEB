@@ -9,22 +9,22 @@
         :root { --primary: #bc13fe; --secondary: #00f2ff; }
         body { 
             margin: 0; padding: 40px 20px; font-family: 'Rajdhani', sans-serif; color: white;
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('pozadi_nabor.jpg') no-repeat center center fixed; background-size: cover;
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('pozadi_nabor.jpg') no-repeat center center fixed; background-size: cover;
         }
-        .form-container { max-width: 800px; margin: 0 auto; background: rgba(15,15,15,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); }
-        h1 { text-align: center; color: var(--primary); letter-spacing: 5px; margin-bottom: 40px; }
+        .form-container { max-width: 800px; margin: 0 auto; background: rgba(10,10,10,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); box-shadow: 0 0 30px rgba(188, 19, 254, 0.2); }
+        h1 { text-align: center; color: var(--primary); letter-spacing: 5px; margin-bottom: 40px; text-transform: uppercase; }
         .input-group { margin-bottom: 25px; }
         label { display: block; color: var(--secondary); margin-bottom: 10px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
-        input, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #444; padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; }
-        textarea { height: 150px; resize: none; }
-        .word-count { text-align: right; font-size: 0.8rem; margin-top: 5px; color: gray; }
-        .submit-btn { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.3s; margin-top: 20px; }
-        .submit-btn:hover { background: #9c10d4; transform: scale(1.02); }
+        input, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #333; padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani'; font-size: 1rem; }
+        textarea { height: 120px; resize: none; }
+        .word-count { text-align: right; font-size: 0.8rem; margin-top: 5px; color: #888; }
+        .submit-btn { width: 100%; padding: 18px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.2rem; transition: 0.3s; margin-top: 20px; }
+        .submit-btn:hover { background: #9c10d4; transform: translateY(-2px); }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <a href="index.html" style="color:gray; text-decoration:none;">← ZPĚT NA DASHBOARD</a>
+        <button onclick="location.href='index.html'" style="background:none; border:none; color:gray; cursor:pointer; font-family:'Rajdhani';">← ZPĚT NA DASHBOARD</button>
         <h1>NÁBOROVÝ PANEL</h1>
         <form id="wl-form">
             <div class="input-group">
@@ -33,15 +33,15 @@
             </div>
             <div class="input-group">
                 <label>2. LORE POSTAVY (MIN. 100 SLOV)</label>
-                <textarea id="lore" placeholder="Příběh tvé postavy..." required></textarea>
+                <textarea id="lore" placeholder="Vypiš příběh své postavy..." required></textarea>
                 <div class="word-count" id="lore-count">Slov: 0 / 100</div>
             </div>
             <div class="input-group">
-                <label>3. CO JE TO FEAR RP? (POPIŠTE VLASTNÍMI SLOVY)</label>
+                <label>3. CO JE TO FEAR RP?</label>
                 <textarea id="fear" required></textarea>
             </div>
             <div class="input-group">
-                <label>4. CO JE TO METAGAMING? (UVEĎTE I PŘÍKLAD)</label>
+                <label>4. CO JE TO METAGAMING?</label>
                 <textarea id="meta" required></textarea>
             </div>
             <button type="submit" class="submit-btn">ODESLAT PŘIHLÁŠKU</button>
@@ -59,14 +59,15 @@
         loreText.addEventListener('input', () => {
             const words = loreText.value.trim().split(/\s+/).filter(w => w.length > 0).length;
             document.getElementById('lore-count').innerText = `Slov: ${words} / 100`;
-            document.getElementById('lore-count').style.color = words >= 100 ? '#22ff22' : 'gray';
+            document.getElementById('lore-count').style.color = words >= 100 ? '#22ff22' : '#ff4444';
         });
 
         document.getElementById('wl-form').onsubmit = async (e) => {
             e.preventDefault();
             const user = JSON.parse(localStorage.getItem('user'));
             const words = loreText.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-            if(words < 100) return alert("Lore musí mít alespoň 100 slov!");
+            
+            if(words < 100) return alert("Tvůj příběh (Lore) musí mít aspoň 100 slov!");
 
             await addDoc(collection(db, "zadosti"), {
                 discordId: user.id,
@@ -78,7 +79,7 @@
                 meta: document.getElementById('meta').value,
                 date: new Date()
             });
-            alert("Přihláška odeslána!");
+            alert("Přihláška byla úspěšně odeslána k vyřízení!");
             location.href = 'index.html';
         };
     </script>
