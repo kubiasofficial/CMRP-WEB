@@ -9,60 +9,112 @@
         :root { --primary: #bc13fe; --secondary: #00f2ff; }
         body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; color: white; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover; display: flex; align-items: center; justify-content: center; }
         .container { width: 100%; max-width: 1000px; padding: 20px; text-align: center; }
-        #login-screen, #dashboard-screen { display: none; flex-direction: column; align-items: center; }
+        
+        /* LOGIN SEKCE */
+        #login-screen { display: flex; flex-direction: column; align-items: center; }
+        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .btn-discord:hover { background: #4752c4; transform: scale(1.05); }
+
+        /* DASHBOARD SEKCE (Skrytá do přihlášení) */
+        #dashboard-screen { display: none; flex-direction: column; align-items: center; }
         .user-info img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--primary); box-shadow: 0 0 20px var(--primary); margin-bottom: 15px; }
         .user-info h1 { font-size: 3.5rem; margin: 0 0 40px 0; letter-spacing: 5px; text-transform: uppercase; }
         .card-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 100%; }
         .card { background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 20px; padding: 30px; width: 260px; transition: 0.3s; cursor: pointer; border-bottom: 4px solid transparent; }
         .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; transition: 0.3s; }
-        #wl-status { font-weight: bold; color: #ffcc00; display: block; margin-top: 10px; font-size: 1.3rem; }
         .logout-btn { margin-top: 40px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-family: 'Rajdhani'; }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="login-screen">
-            <h1 style="font-size: 4rem; letter-spacing: 10px; color: var(--primary);">CMRP</h1>
-            <button class="btn-discord" onclick="loginWithDiscord()">PŘIHLÁSIT PŘES DISCORD</button>
+            <h1 style="font-size: 5rem; letter-spacing: 15px; color: var(--primary); margin-bottom: 30px; text-shadow: 0 0 20px rgba(188,19,254,0.5);">CMRP</h1>
+            <button class="btn-discord" onclick="loginWithDiscord()">PŘIHLÁSIT SE PŘES DISCORD</button>
         </div>
+
         <div id="dashboard-screen">
-            <div class="user-info"><img id="user-avatar" src=""><h1 id="user-name"></h1></div>
+            <div class="user-info">
+                <img id="user-avatar" src="">
+                <h1 id="user-name"></h1>
+            </div>
             <div class="card-grid">
-                <div class="card" style="border-bottom-color: var(--secondary);" onclick="location.href='prihlaska.html'"><h3>Přihláška</h3><p>Odeslat žádost</p></div>
-                <div class="card" style="border-bottom-color: #ffcc00;"><h3>Stav WL</h3><span id="wl-status">NAČÍTÁNÍ...</span></div>
-                <div class="card" style="border-bottom-color: var(--primary);" onclick="location.href='admin.html'"><h3>Admin</h3><p>Správa žádostí</p></div>
+                <div class="card" style="border-bottom-color: var(--secondary);" onclick="location.href='prihlaska.html'">
+                    <h3>PŘIHLÁŠKA</h3>
+                    <p>Odeslat žádost o WL</p>
+                </div>
+                <div class="card" style="border-bottom-color: #ffcc00;">
+                    <h3>STAV WL</h3>
+                    <span id="wl-status" style="font-weight: bold; font-size: 1.2rem;">NAČÍTÁNÍ...</span>
+                </div>
+                <div class="card" style="border-bottom-color: var(--primary);" onclick="location.href='admin.html'">
+                    <h3>ADMIN</h3>
+                    <p>Správa žádostí</p>
+                </div>
             </div>
             <button class="logout-btn" onclick="logout()">ODHLÁSIT SE</button>
         </div>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-        const CLIENT_ID = '1475163869092511834';
-        window.loginWithDiscord = () => { window.location.href = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(window.location.origin + '/')}&scope=identify`; };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const CLIENT_ID = '1475163869092511834'; 
+        const REDIRECT_URI = window.location.origin + '/';
+
+        // FUNKCE PRO PŘESMĚROVÁNÍ NA DISCORD
+        window.loginWithDiscord = () => {
+            const url = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=identify`;
+            window.location.href = url;
+        };
+
         async function init() {
             const fragment = new URLSearchParams(window.location.hash.slice(1));
             let token = fragment.get('access_token') || localStorage.getItem('discord_token');
+
             if (token) {
-                localStorage.setItem('discord_token', token); window.location.hash = "";
-                const userRes = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
-                const userData = await userRes.json();
-                if (userData.id) {
-                    localStorage.setItem('user', JSON.stringify(userData));
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('dashboard-screen').style.display = 'flex';
-                    document.getElementById('user-name').innerText = userData.username.toUpperCase();
-                    document.getElementById('user-avatar').src = userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                    const userRef = doc(db, "users", userData.id);
-                    const userDoc = await getDoc(userRef);
-                    if (!userDoc.exists()) { await setDoc(userRef, { wlStatus: 'none', username: userData.username, role: 'user' }); document.getElementById('wl-status').innerText = 'NONE'; }
-                    else { document.getElementById('wl-status').innerText = userDoc.data().wlStatus.toUpperCase(); }
+                localStorage.setItem('discord_token', token);
+                window.location.hash = ""; // Vyčistíme URL od tokenu
+
+                try {
+                    const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
+                    const userData = await res.json();
+
+                    if (userData.id) {
+                        localStorage.setItem('user', JSON.stringify(userData));
+                        
+                        // Přepneme obrazovky
+                        document.getElementById('login-screen').style.display = 'none';
+                        document.getElementById('dashboard-screen').style.display = 'flex';
+
+                        // Nastavíme údaje
+                        document.getElementById('user-name').innerText = userData.username.toUpperCase();
+                        document.getElementById('user-avatar').src = userData.avatar 
+                            ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` 
+                            : 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+                        // Načteme stav z Firebase
+                        const userRef = doc(db, "users", userData.id);
+                        const userDoc = await getDoc(userRef);
+                        
+                        if (!userDoc.exists()) {
+                            await setDoc(userRef, { username: userData.username, wlStatus: 'none', role: 'user' });
+                            document.getElementById('wl-status').innerText = 'NONE';
+                        } else {
+                            document.getElementById('wl-status').innerText = userDoc.data().wlStatus.toUpperCase();
+                        }
+                    }
+                } catch (e) {
+                    console.error("Chyba přihlášení", e);
+                    logout();
                 }
-            } else { document.getElementById('login-screen').style.display = 'flex'; }
+            }
         }
+
         window.logout = () => { localStorage.clear(); location.reload(); };
         init();
     </script>

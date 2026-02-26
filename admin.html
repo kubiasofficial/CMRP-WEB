@@ -6,85 +6,75 @@
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #bc13fe; --secondary: #00f2ff; }
-        body { margin: 0; padding: 0; font-family: 'Rajdhani', sans-serif; background: #050505; color: white; height: 100vh; overflow: hidden; }
-        .admin-layout { display: grid; grid-template-columns: 320px 1fr 300px; gap: 15px; padding: 15px; height: 100vh; box-sizing: border-box; }
-        .col { background: rgba(15,15,15,0.9); border: 1px solid #222; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
-        .col-header { padding: 15px; background: rgba(188,19,254,0.1); border-bottom: 1px solid var(--primary); text-align: center; font-weight: bold; letter-spacing: 2px; color: var(--primary); }
+        body { margin: 0; padding: 0; font-family: 'Rajdhani', sans-serif; background: #050505; color: white; height: 100vh; display: flex; }
+        .col { flex: 1; border-right: 1px solid #222; display: flex; flex-direction: column; overflow: hidden; background: rgba(10,10,10,0.8); }
+        .col-header { padding: 20px; background: var(--primary); font-weight: bold; text-align: center; letter-spacing: 2px; }
         .col-content { flex: 1; overflow-y: auto; padding: 15px; }
         
-        /* Karty */
-        .card { background: #111; border: 1px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
-        .hist-item { font-size: 0.85rem; border-left: 3px solid #444; padding-left: 10px; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #222; }
-        .hist-schváleno { border-left-color: #22ff22; }
-        .hist-zamítnuto { border-left-color: #ff2222; }
-        
-        .q-box { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 0.9rem; border-left: 2px solid var(--secondary); }
-        input[type="text"] { width: 100%; background: #000; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; margin-bottom: 10px; font-family: 'Rajdhani'; }
-        button { padding: 8px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: 'Rajdhani'; }
-        
-        .adder-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #222; }
-        .adder-item img { width: 30px; border-radius: 50%; border: 1px solid var(--primary); }
+        .card { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+        .q-box { background: #1a1a1a; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 0.9rem; border-left: 3px solid var(--secondary); }
+        .adder-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #222; }
+        .adder-item img { width: 35px; border-radius: 50%; border: 2px solid var(--primary); }
+        button { padding: 8px 15px; border: none; cursor: pointer; font-weight: bold; font-family: 'Rajdhani'; border-radius: 5px; }
     </style>
 </head>
 <body>
-    <div class="admin-layout">
-        <div class="col">
-            <div class="col-header">📜 HISTORIE</div>
-            <div class="col-content" id="hist-list"></div>
-        </div>
+    <div class="col" style="max-width: 350px;">
+        <div class="col-header">📜 HISTORIE ROZHODNUTÍ</div>
+        <div class="col-content" id="hist-list"></div>
+    </div>
 
-        <div class="col">
-            <div class="col-header">📥 PŘÍCHOZÍ ŽÁDOSTI</div>
-            <div class="col-content" id="req-list"></div>
-        </div>
+    <div class="col">
+        <div class="col-header">📥 ČEKAJÍCÍ ŽÁDOSTI</div>
+        <div class="col-content" id="req-list"></div>
+    </div>
 
-        <div class="col">
-            <div class="col-header">🛡️ WL ADDEŘI</div>
-            <div class="col-content" id="adder-list"></div>
-        </div>
+    <div class="col" style="max-width: 300px;">
+        <div class="col-header">🛡️ WL ADDEŘI</div>
+        <div class="col-content" id="adder-list"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, deleteDoc, updateDoc, addDoc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, deleteDoc, updateDoc, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
         const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
-        // 1. NAČÍTÁNÍ HISTORIE
-        onSnapshot(query(collection(db, "history"), orderBy("date", "desc")), (snap) => {
+        // NAČÍST HISTORII
+        onSnapshot(collection(db, "history"), (snap) => {
             const list = document.getElementById('hist-list'); list.innerHTML = "";
             snap.forEach(s => {
                 const d = s.data();
-                list.innerHTML += `<div class="hist-item hist-${d.status}">
-                    <strong>${d.status.toUpperCase()}</strong>: ${d.targetNick || d.uid}<br>
-                    <small>Admin: ${d.admin} | Pokus: ${d.pokus || '?'}</small>
+                list.innerHTML += `<div class="card" style="font-size:0.8rem; border-left: 3px solid ${d.status === 'schváleno' ? '#22ff22' : '#ff2222'}">
+                    <strong>${d.status.toUpperCase()}</strong> - ${d.uid}<br>Admin: ${d.admin}
                 </div>`;
             });
         });
 
-        // 2. NAČÍTÁNÍ ŽÁDOSTÍ (S MOŽNOSTÍ ČTENÍ)
+        // NAČÍST ŽÁDOSTI (K PŘEČTENÍ)
         onSnapshot(collection(db, "zadosti"), (snap) => {
-            const list = document.getElementById('req-list'); list.innerHTML = snap.empty ? "Žádné žádosti k vyřízení." : "";
+            const list = document.getElementById('req-list'); list.innerHTML = "";
             snap.forEach(s => {
                 const d = s.data();
                 const card = document.createElement('div'); card.className = "card";
                 card.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
                         <img src="${d.avatar}" style="width:40px; border-radius:50%;">
-                        <strong>${d.discordTag}</strong> <span style="color:var(--secondary)">(Pokus: ${d.pokus}.)</span>
+                        <strong>${d.discordTag}</strong> (Pokus: ${d.pokus}.)
                     </div>
                     <div class="q-box"><strong>LORE:</strong> ${d.lore}</div>
-                    <div class="q-box"><strong>FEAR/META/EMS:</strong><br>${d.fear}<br>---<br>${d.meta}<br>---<br>${d.ems}</div>
-                    <input type="text" id="reason-${s.id}" placeholder="Důvod zamítnutí / Poznámka...">
-                    <div style="display:flex; gap:10px;">
-                        <button style="background:#22ff22; flex:1;" onclick="decide('${s.id}', '${d.discordId}', 'schváleno', ${JSON.stringify(d).replace(/"/g, '&quot;')})">SCHVÁLIT</button>
-                        <button style="background:#ff2222; color:white; flex:1;" onclick="decide('${s.id}', '${d.discordId}', 'zamítnuto', ${JSON.stringify(d).replace(/"/g, '&quot;')})">ZAMÍTNOUT</button>
+                    <div class="q-box"><strong>FEAR/META:</strong> ${d.fear} / ${d.meta}</div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <input type="text" id="r-${s.id}" placeholder="Důvod..." style="flex:1; background:#000; color:#fff; border:1px solid #444; padding:5px;">
+                        <button style="background:#22ff22;" onclick="decide('${s.id}', '${d.discordId}', 'schváleno', '${d.discordTag}', ${d.pokus})">PŘIJMOUT</button>
+                        <button style="background:#ff2222; color:white;" onclick="decide('${s.id}', '${d.discordId}', 'zamítnuto', '${d.discordTag}', ${d.pokus})">ZAMÍTNOUT</button>
                     </div>`;
                 list.appendChild(card);
             });
         });
 
-        // 3. SEZNAM WL ADDERŮ (Uživatelé s rolí admin)
+        // NAČÍST ADDRY (Uživatelé s rolí admin)
         onSnapshot(query(collection(db, "users"), where("role", "==", "admin")), (snap) => {
             const list = document.getElementById('adder-list'); list.innerHTML = "";
             snap.forEach(s => {
@@ -93,21 +83,13 @@
             });
         });
 
-        window.decide = async (docId, uid, status, originalData) => {
-            const reason = document.getElementById(`reason-${docId}`).value;
-            const admin = JSON.parse(localStorage.getItem('user'))?.username || "Neznámý Admin";
-            if (status === 'zamítnuto' && !reason) return alert("Zadej důvod zamítnutí!");
+        window.decide = async (id, uid, status, nick, pokus) => {
+            const reason = document.getElementById(`r-${id}`).value;
+            const admin = JSON.parse(localStorage.getItem('user'))?.username || "Admin";
 
             await updateDoc(doc(db, "users", uid), { wlStatus: status });
-            await addDoc(collection(db, "history"), { uid, targetNick: originalData.discordTag, status, reason: reason || "Schváleno", admin: admin, pokus: originalData.pokus, date: serverTimestamp() });
-            await deleteDoc(doc(db, "zadosti", docId));
-
-            // WEBHOOKY
-            const webhook = status === 'schváleno' ? "https://discord.com/api/webhooks/1476489493056979004/Q2y0Kl0wpzyanQJWPd3OKuP_ZKw9lkjSQOohONKhAZpqb4XzCEh3TNOM-avN7bFCLaBP" : "https://discord.com/api/webhooks/1476489397254885438/wsZXiU-fudd36_hDir8aSFNSdKUeJZYADJoVJMS99E0m1w2CbioG0KZHRlpdBF7krMkg";
-            await fetch(webhook, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ embeds: [{
-                title: status === 'schváleno' ? "✅ Žádost Schválena" : "❌ Žádost Zamítnuta", color: status==='schváleno'?3066993:15158332, thumbnail: {url: originalData.avatar},
-                fields: [{name:"Hráč", value:originalData.discordTag, inline:true},{name:"Pokus", value:originalData.pokus+".", inline:true},{name:"WL Adder", value:admin, inline:true},{name:"Důvod/Poznámka", value:reason || "Schváleno"}], timestamp: new Date()
-            }]})});
+            await addDoc(collection(db, "history"), { uid, status, reason: reason || "V pořádku", admin, date: serverTimestamp() });
+            await deleteDoc(doc(db, "zadosti", id));
             alert("Vyřízeno!");
         };
     </script>
