@@ -6,35 +6,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #bc13fe; --secondary: #00f2ff; }
-        body { margin: 0; padding: 40px 20px; font-family: 'Rajdhani', sans-serif; color: white; background: #0a0a0a; }
-        .form-container { max-width: 800px; margin: 0 auto; background: rgba(20,20,20,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); }
-        label { display: block; color: var(--secondary); margin: 20px 0 10px; text-transform: uppercase; font-size: 0.8rem; }
-        input, textarea { width: 100%; background: #111; border: 1px solid #333; padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; }
-        .submit-btn { width: 100%; padding: 20px; background: var(--primary); border: none; color: white; font-weight: bold; margin-top: 30px; cursor: pointer; border-radius: 10px; }
+        body { margin: 0; padding: 40px 20px; font-family: 'Rajdhani', sans-serif; color: white; background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover; }
+        .form-container { max-width: 800px; margin: 0 auto; background: rgba(10,10,10,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); }
+        h1 { text-align: center; color: var(--primary); letter-spacing: 5px; text-transform: uppercase; }
+        .input-group { margin-bottom: 25px; }
+        label { display: block; color: var(--secondary); margin-bottom: 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; }
+        input, textarea { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; }
+        textarea { height: 120px; resize: none; }
+        .submit-btn { width: 100%; padding: 20px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
+        .submit-btn:hover { box-shadow: 0 0 20px var(--primary); }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <h1 style="text-align:center; color:var(--primary);">NÁBOROVÝ PANEL</h1>
+        <button onclick="location.href='index.html'" style="background:none; border:none; color:gray; cursor:pointer; font-family:'Rajdhani'; margin-bottom:20px;">← ZPĚT</button>
+        <h1>NÁBOROVÝ PANEL</h1>
         <form id="wl-form">
-            <label>1. STEAM HEX ID</label><input type="text" id="steamHex" required>
-            <label>2. LORE (MIN 100 SLOV)</label><textarea id="lore" required></textarea>
-            <div id="lore-count" style="text-align:right; font-size:0.8rem; color:red;">Slov: 0 / 100</div>
-            <label>3. FEAR RP</label><textarea id="fear" required></textarea>
-            <label>4. METAGAMING</label><textarea id="meta" required></textarea>
-            <label>5. EMS SITUACE</label><textarea id="ems" required></textarea>
+            <div class="input-group"><label>1. STEAM HEX ID</label><input type="text" id="steamHex" required></div>
+            <div class="input-group"><label>2. LORE (MIN 100 SLOV)</label><textarea id="lore" required></textarea><div id="lore-count" style="text-align:right; font-size:0.8rem; color:red;">Slov: 0 / 100</div></div>
+            <div class="input-group"><label>3. FEAR RP</label><textarea id="fear" required></textarea></div>
+            <div class="input-group"><label>4. METAGAMING</label><textarea id="meta" required></textarea></div>
+            <div class="input-group"><label>5. EMS SITUACE</label><textarea id="ems" required></textarea></div>
             <button type="submit" class="submit-btn">ODESLAT PŘIHLÁŠKU</button>
         </form>
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
         const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
-        const loreArea = document.getElementById('lore');
-        loreArea.oninput = () => {
-            const count = loreArea.value.trim().split(/\s+/).filter(w => w).length;
+        const loreIn = document.getElementById('lore');
+        loreIn.oninput = () => {
+            const count = loreIn.value.trim().split(/\s+/).filter(w => w).length;
             document.getElementById('lore-count').innerText = `Slov: ${count} / 100`;
             document.getElementById('lore-count').style.color = count >= 100 ? 'lime' : 'red';
         };
@@ -42,37 +46,31 @@
         document.getElementById('wl-form').onsubmit = async (e) => {
             e.preventDefault();
             const user = JSON.parse(localStorage.getItem('user'));
-            const count = loreArea.value.trim().split(/\s+/).filter(w => w).length;
+            const count = loreIn.value.trim().split(/\s+/).filter(w => w).length;
             if(count < 100) return alert("Lore musí mít 100+ slov!");
 
+            // VÝPOČET POKUSU
             const q = query(collection(db, "history"), where("uid", "==", user.id));
             const snap = await getDocs(q);
-            const pokus = snap.size + 1;
+            const pokusNum = snap.size + 1;
 
-            const data = { 
-                discordId: user.id, 
-                discordTag: user.username, 
-                steamHex: document.getElementById('steamHex').value, 
-                lore: loreArea.value, 
-                fear: document.getElementById('fear').value, 
-                meta: document.getElementById('meta').value, 
-                ems: document.getElementById('ems').value, 
-                pokus: pokus, 
-                avatar: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` 
+            const docData = {
+                discordId: user.id, discordTag: user.username, pokus: pokusNum,
+                avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png',
+                steamHex: document.getElementById('steamHex').value, lore: loreIn.value,
+                fear: document.getElementById('fear').value, meta: document.getElementById('meta').value,
+                ems: document.getElementById('ems').value, date: serverTimestamp()
             };
-            
-            await addDoc(collection(db, "zadosti"), data);
 
-            // WEBHOOK PRO NOVOU ŽÁDOST
+            await addDoc(collection(db, "zadosti"), docData);
+            
+            // WEBHOOK - NOVÁ ŽÁDOST
             await fetch("https://discord.com/api/webhooks/1476489267675926560/5YCc3XdSBBysToUuIZ-8iatR74sTUHOunQH7XPCk4iK1m7DR7CMpP0d8Z_SDI_7XvROf", {
                 method: "POST", headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ embeds: [{ title: "📩 Příchozí přihláčka", color: 12325886, thumbnail: {url: data.avatar}, fields: [
-                    {name: "Discord Nick", value: data.discordTag, inline: true},
-                    {name: "Discord ID", value: data.discordId, inline: true},
-                    {name: "Pokus", value: pokus.toString() + ".", inline: true}
-                ], timestamp: new Date() }]})
+                body: JSON.stringify({ embeds: [{ title: "📩 Příchozí přihláčka", color: 12325886, thumbnail: {url: docData.avatar}, fields: [{name: "Hráč", value: docData.discordTag, inline: true},{name: "Pokus", value: pokusNum.toString()+".", inline: true}], timestamp: new Date() }]})
             });
-            alert("Odesláno!"); location.href='index.html';
+
+            alert("Odesláno jako " + pokusNum + ". pokus!"); location.href='index.html';
         };
     </script>
 </body>

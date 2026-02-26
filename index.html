@@ -16,6 +16,7 @@
         .card { background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 20px; padding: 30px; width: 260px; transition: 0.3s; cursor: pointer; border-bottom: 4px solid transparent; }
         .card:hover { border-color: var(--primary); transform: translateY(-5px); }
         .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; transition: 0.3s; }
+        #wl-status { font-weight: bold; color: #ffcc00; display: block; margin-top: 10px; font-size: 1.3rem; }
         .logout-btn { margin-top: 40px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-family: 'Rajdhani'; }
     </style>
 </head>
@@ -54,9 +55,11 @@
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('dashboard-screen').style.display = 'flex';
                     document.getElementById('user-name').innerText = userData.username.toUpperCase();
-                    document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
-                    const userDoc = await getDoc(doc(db, "users", userData.id));
-                    document.getElementById('wl-status').innerText = userDoc.exists() ? userDoc.data().wlStatus.toUpperCase() : 'NONE';
+                    document.getElementById('user-avatar').src = userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                    const userRef = doc(db, "users", userData.id);
+                    const userDoc = await getDoc(userRef);
+                    if (!userDoc.exists()) { await setDoc(userRef, { wlStatus: 'none', username: userData.username, role: 'user' }); document.getElementById('wl-status').innerText = 'NONE'; }
+                    else { document.getElementById('wl-status').innerText = userDoc.data().wlStatus.toUpperCase(); }
                 }
             } else { document.getElementById('login-screen').style.display = 'flex'; }
         }
