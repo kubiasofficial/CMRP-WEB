@@ -2,59 +2,38 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMRP | Nábor</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #bc13fe; --secondary: #00f2ff; }
-        body { 
-            margin: 0; padding: 40px 20px; font-family: 'Rajdhani', sans-serif; color: white;
-            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover;
-        }
+        body { margin: 0; padding: 40px 20px; font-family: 'Rajdhani', sans-serif; color: white; background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('pozadicko.jpg') no-repeat center center fixed; background-size: cover; }
         .form-container { max-width: 800px; margin: 0 auto; background: rgba(10,10,10,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); }
         h1 { text-align: center; color: var(--primary); letter-spacing: 5px; text-transform: uppercase; }
-        .input-group { margin-bottom: 25px; }
-        label { display: block; color: var(--secondary); margin-bottom: 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; }
+        label { display: block; color: var(--secondary); margin-bottom: 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; margin-top: 20px;}
         input, textarea { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 15px; border-radius: 10px; color: white; font-family: 'Rajdhani'; box-sizing: border-box; }
         textarea { height: 120px; resize: none; }
-        .submit-btn { width: 100%; padding: 18px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
-        .submit-btn:hover { background: #9c10d4; transform: scale(1.01); }
-        .back-btn { background: none; border: none; color: gray; cursor: pointer; font-family: 'Rajdhani'; margin-bottom: 20px; }
+        .submit-btn { width: 100%; padding: 18px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.2rem; margin-top: 30px;}
     </style>
 </head>
 <body>
     <div class="form-container">
-        <button class="back-btn" onclick="location.href='index.html'">← ZPĚT NA DASHBOARD</button>
+        <button onclick="location.href='index.html'" style="background:none; border:none; color:gray; cursor:pointer; font-family:'Rajdhani';">← ZPĚT</button>
         <h1>NÁBOROVÝ PANEL</h1>
         <form id="wl-form">
-            <div class="input-group">
-                <label>1. STEAM HEX ID</label>
-                <input type="text" id="steamHex" placeholder="steam:1100001..." required>
-            </div>
-            <div class="input-group">
-                <label>2. LORE POSTAVY (MIN. 100 SLOV)</label>
-                <textarea id="lore" required></textarea>
-                <div id="lore-count" style="text-align:right; font-size:0.8rem; color: #ff4444;">Slov: 0 / 100</div>
-            </div>
-            <div class="input-group">
-                <label>3. CO JE TO FEAR RP?</label>
-                <textarea id="fear" required></textarea>
-            </div>
-            <div class="input-group">
-                <label>4. CO JE TO METAGAMING?</label>
-                <textarea id="meta" required></textarea>
-            </div>
-            <div class="input-group">
-                <label>5. PO TRANSPORTU SCRIPTEM (MÍSTNÍ EMS)...</label>
-                <textarea id="ems" placeholder="Co se děje po probuzení v nemocnici?" required></textarea>
-            </div>
+            <label>1. STEAM HEX ID</label><input type="text" id="steamHex" placeholder="steam:1100001..." required>
+            <label>2. LORE POSTAVY (MIN. 100 SLOV)</label>
+            <textarea id="lore" required></textarea>
+            <div id="lore-count" style="text-align:right; font-size:0.8rem; color: #ff4444;">Slov: 0 / 100</div>
+            <label>3. CO JE TO FEAR RP?</label><textarea id="fear" required></textarea>
+            <label>4. CO JE TO METAGAMING?</label><textarea id="meta" required></textarea>
+            <label>5. PO TRANSPORTU SCRIPTEM (EMS SITUACE)...</label><textarea id="ems" required></textarea>
             <button type="submit" class="submit-btn">ODESLAT PŘIHLÁŠKU</button>
         </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
         const app = initializeApp(firebaseConfig);
@@ -70,24 +49,35 @@
         document.getElementById('wl-form').onsubmit = async (e) => {
             e.preventDefault();
             const user = JSON.parse(localStorage.getItem('user'));
-            if(!user) return alert("Chyba přihlášení!");
-
             const count = loreIn.value.trim().split(/\s+/).filter(w => w).length;
-            if(count < 100) return alert("Lore musí mít minimálně 100 slov!");
+            if(count < 100) return alert("Lore musí mít 100+ slov!");
 
-            await addDoc(collection(db, "zadosti"), {
-                discordId: user.id,
-                discordTag: user.username,
+            // ZJIŠTĚNÍ POKUSU
+            const q = query(collection(db, "history"), where("uid", "==", user.id));
+            const snap = await getDocs(q);
+            const pokus = snap.size + 1;
+
+            const docData = {
+                discordId: user.id, discordTag: user.username, pokus: pokus,
                 avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png',
-                steamHex: document.getElementById('steamHex').value,
-                lore: document.getElementById('lore').value,
-                fear: document.getElementById('fear').value,
-                meta: document.getElementById('meta').value,
-                ems: document.getElementById('ems').value,
-                date: new Date()
+                steamHex: document.getElementById('steamHex').value, lore: loreIn.value,
+                fear: document.getElementById('fear').value, meta: document.getElementById('meta').value,
+                ems: document.getElementById('ems').value, date: new Date()
+            };
+
+            await addDoc(collection(db, "zadosti"), docData);
+
+            // DISCORD WEBHOOK: PŘÍCHOZÍ
+            await fetch("https://discord.com/api/webhooks/1476489267675926560/5YCc3XdSBBysToUuIZ-8iatR74sTUHOunQH7XPCk4iK1m7DR7CMpP0d8Z_SDI_7XvROf", {
+                method: "POST", headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ embeds: [{ title: "📩 Příchozí přihláčka", color: 12325886, thumbnail: {url: docData.avatar}, fields: [
+                    {name: "Discord Nick", value: docData.discordTag, inline: true},
+                    {name: "Discord ID", value: docData.discordId, inline: true},
+                    {name: "Pokus", value: pokus.toString() + ".", inline: true}
+                ], timestamp: new Date() }]})
             });
-            alert("Přihláška odeslána!");
-            location.href = 'index.html';
+
+            alert("Odesláno!"); location.href='index.html';
         };
     </script>
 </body>
