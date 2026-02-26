@@ -15,68 +15,49 @@
         .card-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 100%; }
         .card { background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 20px; padding: 30px; width: 260px; transition: 0.3s; cursor: pointer; border-bottom: 4px solid transparent; }
         .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; transition: 0.3s; text-transform: uppercase; }
+        .btn-discord { background: #5865F2; color: white; padding: 18px 35px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: none; font-family: 'Rajdhani'; transition: 0.3s; }
         .logout-btn { margin-top: 40px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-family: 'Rajdhani'; }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="login-screen">
-            <h1 style="font-size: 4rem; letter-spacing: 10px; color: var(--primary); margin-bottom: 20px;">CMRP</h1>
+            <h1 style="font-size: 4rem; letter-spacing: 10px; color: var(--primary);">CMRP</h1>
             <button class="btn-discord" onclick="loginWithDiscord()">PŘIHLÁSIT PŘES DISCORD</button>
         </div>
         <div id="dashboard-screen">
             <div class="user-info"><img id="user-avatar" src=""><h1 id="user-name"></h1></div>
             <div class="card-grid">
-                <div class="card" style="border-bottom-color: var(--secondary);" onclick="location.href='prihlaska.html'"><h3>Přihláška</h3><p>Odeslat žádost o WL</p></div>
-                <div class="card" style="border-bottom-color: #ffcc00;"><h3>Stav WL</h3><span id="wl-status" style="color:#ffcc00; font-weight:bold; display:block; margin:10px 0; font-size: 1.2rem;">NAČÍTÁNÍ...</span></div>
-                <div class="card" style="border-bottom-color: var(--primary);" onclick="location.href='hlavni.html'"><h3>WL Adder</h3><p>Administrace a Pomůcky</p></div>
+                <div class="card" style="border-bottom-color: var(--secondary);" onclick="location.href='prihlaska.html'"><h3>Přihláška</h3><p>Odeslat žádost</p></div>
+                <div class="card" style="border-bottom-color: #ffcc00;"><h3>Stav WL</h3><span id="wl-status">NAČÍTÁNÍ...</span></div>
+                <div class="card" style="border-bottom-color: var(--primary);" onclick="location.href='admin.html'"><h3>Admin</h3><p>Správa žádostí</p></div>
             </div>
             <button class="logout-btn" onclick="logout()">ODHLÁSIT SE</button>
         </div>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
         const firebaseConfig = { apiKey: "AIzaSyBpP1B-Gob2GkgQ761nyLTBhCtZBKOCvvs", authDomain: "cmrp-system.firebaseapp.com", projectId: "cmrp-system", storageBucket: "cmrp-system.firebasestorage.app", appId: "1:264321137651:web:295e93bd12e7f8b80fb086" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        const CLIENT_ID = '1475163869092511834'; 
-        const REDIRECT_URI = window.location.origin + '/';
-
-        window.loginWithDiscord = () => {
-            window.location.href = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=identify`;
-        };
-
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+        const CLIENT_ID = '1475163869092511834';
+        window.loginWithDiscord = () => { window.location.href = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(window.location.origin + '/')}&scope=identify`; };
         async function init() {
             const fragment = new URLSearchParams(window.location.hash.slice(1));
-            let accessToken = fragment.get('access_token') || localStorage.getItem('discord_token');
-
-            if (accessToken) {
-                localStorage.setItem('discord_token', accessToken);
-                window.location.hash = "";
-                try {
-                    const userRes = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${accessToken}` } });
-                    const userData = await userRes.json();
-                    if (userData.id) {
-                        localStorage.setItem('user', JSON.stringify(userData));
-                        document.getElementById('login-screen').style.display = 'none';
-                        document.getElementById('dashboard-screen').style.display = 'flex';
-                        document.getElementById('user-name').innerText = userData.username.toUpperCase();
-                        document.getElementById('user-avatar').src = userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
-
-                        const userDoc = await getDoc(doc(db, "users", userData.id));
-                        if (!userDoc.exists()) {
-                            await setDoc(doc(db, "users", userData.id), { wlStatus: 'none', username: userData.username });
-                            document.getElementById('wl-status').innerText = 'NONE';
-                        } else {
-                            document.getElementById('wl-status').innerText = userDoc.data().wlStatus.toUpperCase();
-                        }
-                    }
-                } catch (e) { localStorage.clear(); location.reload(); }
+            let token = fragment.get('access_token') || localStorage.getItem('discord_token');
+            if (token) {
+                localStorage.setItem('discord_token', token); window.location.hash = "";
+                const userRes = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
+                const userData = await userRes.json();
+                if (userData.id) {
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('dashboard-screen').style.display = 'flex';
+                    document.getElementById('user-name').innerText = userData.username.toUpperCase();
+                    document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+                    const userDoc = await getDoc(doc(db, "users", userData.id));
+                    document.getElementById('wl-status').innerText = userDoc.exists() ? userDoc.data().wlStatus.toUpperCase() : 'NONE';
+                }
             } else { document.getElementById('login-screen').style.display = 'flex'; }
         }
         window.logout = () => { localStorage.clear(); location.reload(); };
